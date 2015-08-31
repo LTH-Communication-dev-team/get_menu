@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<T3locallang>
+	<meta type="array">
+		<type>database</type>
+		<description>Language labels for database tables/fields belonging to extension 'get_menu'</description>
+	</meta>
+	<data type="array">
+		<languageKey index="default" type="array">
+			<label index="pages.lft">lft</label>
+			<label index="pages.rgt">rgt</label>
+			<label index="pages.root">root</label>
+		</languageKey>
+	</data>
+</T3locallang>
