@@ -123,14 +123,14 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
         SELECT SUBSTRING_INDEX(GROUP_CONCAT(template.pid),',',-1) 
         FROM pages AS node 
         JOIN pages AS parent 
-        LEFT JOIN sys_template template ON parent.uid=template.pid AND template.root = 1 
+        LEFT JOIN sys_template AS template ON parent.uid=template.pid AND template.root = 1 AND template.deleted = 0 AND template.hidden = 0
         WHERE node.lft BETWEEN parent.lft AND parent.rgt AND node.uid = $uid
         ORDER BY node.lft
         ) AND node.root = (
         SELECT SUBSTRING_INDEX(GROUP_CONCAT(template.pid),',',-1) 
         FROM pages AS node 
         JOIN pages AS parent 
-        LEFT JOIN sys_template template ON parent.uid=template.pid AND template.root = 1 
+        LEFT JOIN sys_template AS template ON parent.uid=template.pid AND template.root = 1 AND template.deleted = 0 AND template.hidden = 0
         WHERE node.lft BETWEEN parent.lft AND parent.rgt AND node.uid = $uid 
         ORDER BY node.lft
         )  AND node.deleted=0 AND node.hidden=0 AND node.starttime <= $unix_timestamp AND 
@@ -163,7 +163,7 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
         }*/
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
         
-        $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => print_r($source,true), 'crdate' => time()));
+        //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => print_r($source,true), 'crdate' => time()));
         $list = $this->makeNested($source);
         return json_encode($list);
     }

@@ -163,7 +163,7 @@
             WHERE node.uid = $uid
             ORDER BY node.lft";*/
             $res1 = $GLOBALS['TYPO3_DB']->exec_SELECTquery("SUBSTRING_INDEX(GROUP_CONCAT(template.pid),',',-1) AS rootid", 
-                    "pages AS node JOIN pages AS parent ON node.lft BETWEEN parent.lft AND parent.rgt AND parent.deleted = 0 LEFT JOIN sys_template template ON parent.uid=template.pid AND template.root=1", 
+                    "pages AS node JOIN pages AS parent ON node.lft BETWEEN parent.lft AND parent.rgt AND parent.deleted = 0 LEFT JOIN sys_template AS template ON parent.uid=template.pid AND template.root=1 AND template.deleted = 0 AND template.hidden = 0", 
                     "node.uid = " . $uid, "", "node.lft");
             //$res1 = $GLOBALS['TYPO3_DB']->sql_query($sql);
             $row1 = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res1);
