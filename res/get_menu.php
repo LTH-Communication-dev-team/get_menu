@@ -164,7 +164,7 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
         
         ////$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => print_r($source,true), 'crdate' => time()));
-        $list = $this->makeNested($source, $nested);
+        $list = $this->makeNested($source);
         return json_encode($list);
     }
     
