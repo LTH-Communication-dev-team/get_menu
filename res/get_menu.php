@@ -172,7 +172,7 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
         try {
             $nested = array();
             foreach ( $source as &$s ) {
-                if ( $s['node_pid']==0 ) {
+                if ( $s['node_pid']==0 || ($s['node_uid']==$s['parent_uid'])) {
                     
                     // no parent_id so we put it in the root of the array
                     $nested[] = &$s;
