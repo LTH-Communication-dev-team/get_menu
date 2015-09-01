@@ -37,7 +37,7 @@
 	    // build a complete copy of the adjacency table in ram
             $unix_timestamp = time();
 	    $s_query = "SELECT uid,pid FROM pages 
-                WHERE deleted = 0 AND NOT t3ver_state>0 AND doktype<200
+                WHERE deleted = 0 AND NOT t3ver_state>0 AND doktype<199
                 ORDER BY sorting";
 	    $i_result = mysql_query($s_query);
 	    $a_rows = array();
@@ -115,7 +115,8 @@
             ";*/
 	    $u_query = "UPDATE pages SET lft = $i_lft,rgt=$i_rgt WHERE uid = $i_id";
 	    try {
-		$i_result = mysql_query($u_query);	
+		$i_result = mysql_query($u_query);
+                $GLOBALS['TYPO3_DB']->sql_free_result($i_result);
 	    } catch(Exception $e) {
 
 	    }
