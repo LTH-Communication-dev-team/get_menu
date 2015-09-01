@@ -30,6 +30,7 @@
 	
 	function execute($input_uid=0)
 	{
+            set_time_limit(0);
 	    $executionSucceeded = FALSE;
             
 	    tslib_eidtools::connectDB();
