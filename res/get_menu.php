@@ -135,7 +135,7 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
         ORDER BY node.lft
         )  AND node.deleted=0 AND node.hidden=0 AND node.starttime <= $unix_timestamp AND 
         (node.endtime=0 OR node.endtime > $unix_timestamp ) 
-        AND NOT node.t3ver_state>0 AND node.doktype<200 AND (node.fe_group='' 
+        AND NOT node.t3ver_state>0 AND node.doktype<199 AND (node.fe_group='' 
         OR node.fe_group IS NULL OR node.fe_group='0' OR FIND_IN_SET('0',node.fe_group) OR FIND_IN_SET('-1',node.fe_group)) 
         LEFT JOIN tx_realurl_pathcache AS PC ON PC.page_id = node.uid
         ORDER BY node.lft";
