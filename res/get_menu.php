@@ -111,7 +111,7 @@ class user_get_menu {
         WHERE node.lft BETWEEN parent.lft AND parent.rgt AND node.uid = $uid 
         ORDER BY node.lft) 
         ORDER BY node.lft";*/
-        $sql = "SELECT parent.uid AS parent_uid, node.uid AS node_uid, node.pid AS node_pid,
+        $sql = "SELECT DISTINCT parent.uid AS parent_uid, node.uid AS node_uid, node.pid AS node_pid,
         CASE 
         WHEN TRIM(node.nav_title) = '' THEN node.title 
         ELSE node.nav_title 
@@ -172,7 +172,7 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
     function makeNested($source, $nested) {
         try {
             foreach ( $source as &$s ) {
-                if ( $s['node_pid']==0 ) {
+                if ( $s['node_pid']==0 || ($s['node_pid']==$s['node_uid']) ) {
                     // no parent_id so we put it in the root of the array
                     $nested[] = &$s;
                 } else {
