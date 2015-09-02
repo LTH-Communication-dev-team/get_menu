@@ -82,6 +82,7 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
                     }
                 }
             }
+            $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => count($nested), 'crdate' => time()));
             if(count($nested)===0) {
                 $nested[] = &$s;
             }
