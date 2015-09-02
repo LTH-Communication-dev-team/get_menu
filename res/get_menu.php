@@ -65,7 +65,7 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
         try {
             $nested = array();
             foreach ( $source as &$s ) {
-                if ( $i===0) {
+                if ( ($s['node_uid'] == $s['parent_uid']) || ($s['parent_uid'] == $s['node_pid']) ) {
                     
                     // no parent_id so we put it in the root of the array
                     $nested[] = &$s;
@@ -94,7 +94,7 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
         }
     }
     
- /*   
+    
     function convertToTree(array $flat, $idField = 'id',
                         $parentIdField = 'parentId',
                         $childNodesField = 'childNodes') {
@@ -133,7 +133,7 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
 
     return $branch;
 }
-   */ 
+    
     /**
     * Creates fakemenu array for use in HMENU
     *
