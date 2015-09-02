@@ -82,7 +82,9 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
                     }
                 }
             }
-
+            if(count($nested)===0) {
+                $nested[] = &$s;
+            }
             return $nested;
         } catch(Exception $e) {
             echo 'Message: ' .$e->getMessage();
