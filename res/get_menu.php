@@ -55,7 +55,7 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
         
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
         
-        //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => print_r($source,true), 'crdate' => time()));
+        $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => print_r($source,true), 'crdate' => time()));
         $list = $this->makeNested($source);
         return json_encode($list);
     }
@@ -82,10 +82,10 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
                     }
                 }
             }
-            $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => count($nested), 'crdate' => time()));
-            if(count($nested)===0) {
+            //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => count($nested), 'crdate' => time()));
+            /*if(count($nested)===0) {
                 $nested[] = &$s;
-            }
+            }*/
             return $nested;
         } catch(Exception $e) {
             echo 'Message: ' .$e->getMessage();
