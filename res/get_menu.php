@@ -55,16 +55,17 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
         
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
         
-        $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => print_r($source,true), 'crdate' => time()));
+        //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => print_r($source,true), 'crdate' => time()));
         $list = $this->makeNested($source);
         return json_encode($list);
     }
     
     function makeNested($source) {
+        $i = 0;
         try {
             $nested = array();
             foreach ( $source as &$s ) {
-                if ( $s['node_pid']==0 || ($s['node_uid']==$s['parent_uid'])) {
+                if ( $i===0) {
                     
                     // no parent_id so we put it in the root of the array
                     $nested[] = &$s;
@@ -81,6 +82,7 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
                         $source[$pid]['_SUB_MENU'][] = &$s;
                     }
                 }
+                $i++;
             }
             //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => count($nested), 'crdate' => time()));
             /*if(count($nested)===0) {
@@ -92,7 +94,7 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
         }
     }
     
-    
+ /*   
     function convertToTree(array $flat, $idField = 'id',
                         $parentIdField = 'parentId',
                         $childNodesField = 'childNodes') {
@@ -131,7 +133,7 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
 
     return $branch;
 }
-    
+   */ 
     /**
     * Creates fakemenu array for use in HMENU
     *
