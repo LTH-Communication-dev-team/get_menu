@@ -4,68 +4,8 @@ class user_get_menu {
     function makeMenuArray($content, $conf) 
     {
         //ToDo: language overlay!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        //$json = '{ "hmenu":[';
-        //tslib_eidtools::connectDB();
         $uid = intval($GLOBALS['TSFE']->id);
         $menuArr = $this->getPages($uid);
-        //$menuArray = $this->createMenuArray($pagesArray);
-        /*$lvl=0;
-        $lvlOld=0;
-        $ii=0;
-        $lConf = $conf["userFunc."];
-        //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $lConf["select."], 'crdate' => time()));
-        $sql = "SELECT parent.uid AS parent_uid, node.uid, node.pid,
-            CASE 
-                WHEN TRIM(node.nav_title) = '' THEN node.title
-                ELSE node.nav_title
-            END AS title, COUNT(parent.uid) AS lvl
-            FROM pages AS node JOIN pages AS parent ON node.lft BETWEEN parent.lft AND parent.rgt AND node.deleted=0 
-            AND node.hidden=0 AND node.starttime<=$unix_timestamp AND
-            (node.endtime=0 OR node.endtime>$unix_timestamp) 
-            AND NOT node.t3ver_state>0 AND node.doktype<200 AND (node.fe_group='' 
-            OR node.fe_group IS NULL OR node.fe_group='0' OR FIND_IN_SET('0',node.fe_group) OR FIND_IN_SET('-1',node.fe_group))
-            GROUP BY node.uid
-            HAVING parent.uid=(SELECT SUBSTRING_INDEX(GROUP_CONCAT(template.pid),',',-1)
-            FROM pages AS node
-            JOIN pages AS parent
-            LEFT JOIN sys_template template ON parent.uid=template.pid AND template.root = 1
-            WHERE node.lft BETWEEN parent.lft AND parent.rgt AND node.uid = $uid
-            ORDER BY node.lft)
-            ORDER BY node.lft";*/
-        
-        /*while ($row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res)) {
-            if($ii>0) {
-                $parent_uid = $row['parent_uid'];
-                $uid = $row['uid'];
-                $pid = $row['pid'];
-                $title = trim($row['title']);
-                $lvl = $row['lvl'];
-                $tmp.= $title;
-                if(($lvl > $lvlOld) && $ii>1) {
-                    $json = substr($json,0,-1);
-                    $json .= ", \"_SUB_MENU\":[{\"title\":\"$title\",\"_OVERRIDE_HREF\":\"index.php?id=$uid\"}";
-                    $levelIndex++;
-                } else if($lvl < $lvlOld) {
-                    for($i==0;$levelIndex;$i++){
-                        $json .= "]}";
-                        $levelIndex--;
-                    }
-                } else {
-                    if(substr($json,-1)=='}') {
-                        $json .= ",";
-                    }
-                    $json .= "{\"title\":\"$title\",\"_OVERRIDE_HREF\":\"index.php?id=$uid\"}";
-                }
-                $lvlOld = $lvl;
-            }
-            $ii++;
-        }*/
-        /*while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) { 
-            if ($uid!=0 && $uid==$row['uid']) {
-                $row['ITEM_STATE']='ACT';
-            }
-            $menuArr[] = $row; 
-        } */
         return "<script language=\"javascript\">var hamburger_array = $menuArr;</script>"; 
     }
     
@@ -76,41 +16,7 @@ class user_get_menu {
         $lvlOld = 0;
         $uidOld = 0;
         $unix_timestamp = time();
-        
-        /*$sql = "SELECT parent.uid AS parent_uid, node.uid AS node_uid, node.pid AS node_pid,
-        CASE 
-        WHEN TRIM(node.nav_title) = '' THEN node.title 
-        ELSE node.nav_title 
-        END AS title, (COUNT(parent.uid) - (sub_tree.depth + 1)) AS lvl, node.root, CONCAT('index.php?id=',node.uid) AS _OVERRIDE_HREF
-        FROM pages AS node 
-        JOIN pages AS parent ON node.lft BETWEEN parent.lft AND parent.rgt AND node.deleted=0 AND node.hidden=0 AND node.starttime<=$unix_timestamp AND 
-        (node.endtime=0 OR node.endtime>$unix_timestamp) 
-        AND NOT node.t3ver_state>0 AND node.doktype<200 AND (node.fe_group='' 
-        OR node.fe_group IS NULL OR node.fe_group='0' OR FIND_IN_SET('0',node.fe_group) OR FIND_IN_SET('-1',node.fe_group)) 
-        JOIN pages AS sub_parent ON node.lft BETWEEN sub_parent.lft AND sub_parent.rgt 
-        JOIN 
-        (
-        SELECT node.uid, (COUNT(parent.uid) - 1) AS depth 
-        FROM pages AS node 
-        JOIN pages AS parent ON node.lft BETWEEN parent.lft AND parent.rgt 
-        AND node.uid = (SELECT SUBSTRING_INDEX(GROUP_CONCAT(template.pid),',',-1) 
-        FROM pages AS node 
-        JOIN pages AS parent 
-        LEFT JOIN sys_template template ON parent.uid=template.pid AND template.root = 1 
-        WHERE node.lft BETWEEN parent.lft AND parent.rgt AND node.uid = $uid 
-        ORDER BY node.lft) 
-        GROUP BY node.uid 
-        ORDER BY node.lft 
-        ) AS sub_tree ON sub_parent.uid = sub_tree.uid 
-        LEFT JOIN sys_template template ON parent.uid=template.pid AND template.root = 1 
-        GROUP BY node.uid 
-        HAVING node.root=(SELECT SUBSTRING_INDEX(GROUP_CONCAT(template.pid),',',-1) 
-        FROM pages AS node 
-        JOIN pages AS parent 
-        LEFT JOIN sys_template template ON parent.uid=template.pid AND template.root = 1 
-        WHERE node.lft BETWEEN parent.lft AND parent.rgt AND node.uid = $uid 
-        ORDER BY node.lft) 
-        ORDER BY node.lft";*/
+
         $sql = "SELECT DISTINCT parent.uid AS parent_uid, node.uid AS node_uid, node.pid AS node_pid,
         CASE 
         WHEN TRIM(node.nav_title) = '' THEN node.title 
@@ -133,7 +39,7 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
         LEFT JOIN sys_template AS template ON parent.uid=template.pid AND template.root = 1 AND template.deleted = 0 AND template.hidden = 0
         WHERE node.lft BETWEEN parent.lft AND parent.rgt AND node.uid = $uid 
         ORDER BY node.lft
-        )  AND node.deleted=0 AND node.hidden=0 AND node.starttime <= $unix_timestamp AND 
+        )  AND node.deleted=0 AND node.hidden=0 AND node.nav_hide = 0 AND node.starttime <= $unix_timestamp AND 
         (node.endtime=0 OR node.endtime > $unix_timestamp ) 
         AND NOT node.t3ver_state>0 AND node.doktype < 199 AND (node.fe_group='' 
         OR node.fe_group IS NULL OR node.fe_group='0' OR FIND_IN_SET('0',node.fe_group) OR FIND_IN_SET('-1',node.fe_group)) 
@@ -147,20 +53,6 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
             $source[$row['node_uid']] = $row;
         }
         
-        /*while($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
-            $thisref = &$refs[ $row['node_uid'] ];
-            $thisref['node_uid'] = $row['node_uid'];
-            $thisref['node_pid'] = $row['node_pid'];
-            $thisref['title'] = $row['title'];
-            $thisref['pagepath'] = $row['pagepath'];
-
-            if ($row['node_pid'] == 0) {
-                $list[ $row['node_uid'] ] = &$thisref;
-            } else {
-                $refs[ $row['node_pid'] ]['_SUB_MENU'][ $row['node_uid'] ] = &$thisref;
-            }
-            
-        }*/
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
         
         //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => print_r($source,true), 'crdate' => time()));
@@ -294,58 +186,5 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
                 }
             }
         }
-    }
-
-
-    
+    }  
 }
-
-/*for($i==0;$levelIndex;$i++){
-                        $json .= "]}";
-                        $levelIndex--;
-                    }
-        $json .= "]}";
-        //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $tmp, 'crdate' => time()));
-        $output = json_decode($json, true);
-        
-        return $output['hmenu'];*/
-        /*return array(
-            array(
-                'title' => 'Contact',
-                '_OVERRIDE_HREF' => 'index.php?id=10',
-                '_SUB_MENU' => array(
-                    array(
-                        'title' => 'Offices',
-                        '_OVERRIDE_HREF' => 'index.php?id=11',
-                       'ITEM_STATE' => 'ACT',
-                       '_SUB_MENU' => array(
-                           array(
-                               'title' => 'Copenhagen Office',
-                               '_OVERRIDE_HREF' => 'index.php?id=11&officeId=cph',
-                           ),
-                           array(
-                               'title' => 'Paris Office',
-                               '_OVERRIDE_HREF' => 'index.php?id=11&officeId=paris',
-                           ),
-                           array(
-                               'title' => 'New York Office',
-                               '_OVERRIDE_HREF' => 'http://www.example.com',
-                               '_OVERRIDE_TARGET' => '_blank',
-                           )
-                       )
-                   ),
-                   array(
-                       'title' => 'Form',
-                       '_OVERRIDE_HREF' => 'index.php?id=10&cmd=showform',
-                   ),
-                   array(
-                       'title' => 'Thank you',
-                       '_OVERRIDE_HREF' => 'index.php?id=10&cmd=thankyou',
-                   ),
-               ),
-           ),
-           array(
-               'title' => 'Products',
-               '_OVERRIDE_HREF' => 'index.php?id=14',
-           )
-         );*/
