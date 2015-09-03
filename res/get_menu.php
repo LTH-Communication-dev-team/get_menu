@@ -6,7 +6,7 @@ class user_get_menu {
         //ToDo: language overlay!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         $uid = intval($GLOBALS['TSFE']->id);
         $menuArr = $this->getPages($uid);
-        return '<script language="javascript">var hamburger_array = ' . json_encode($menuArr[0]) . '; var nestedType = ' . $menuArr[1] . ';</script>'; 
+        return '<script language="javascript">var hamburger_array = ' . json_encode($menuArr[0]) . '; var nestedType = "' . $menuArr[1] . '";</script>'; 
     }
     
     
