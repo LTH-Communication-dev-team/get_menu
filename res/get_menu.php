@@ -6,7 +6,7 @@ class user_get_menu {
         //ToDo: language overlay!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         $uid = intval($GLOBALS['TSFE']->id);
         $menuArr = $this->getPages($uid);
-        return "<script language=\"javascript\">var hamburger_array = $menuArr;</script>"; 
+        return '<script language="javascript">var hamburger_array = ' . json_encode($menuArr[0]) . '; var nestedType = ' . $menuArr[1] . ';</script>'; 
     }
     
     
@@ -57,18 +57,21 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
         
         //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => print_r($source,true), 'crdate' => time()));
         $list = $this->makeNested($source);
-        return json_encode($list);
+        return array($list[0], $list[1]);
     }
     
     function makeNested($source) {
         $i = 0;
+        $nestedType = 1;
         try {
             $nested = array();
             foreach ( $source as &$s ) {
-                if ( ($s['node_uid'] == $s['parent_uid']) || ($s['parent_uid'] == $s['node_pid']) ) {
-                    
+                if ( $s['node_uid'] == $s['parent_uid']) {
                     // no parent_id so we put it in the root of the array
                     $nested[] = &$s;
+                } else if($s['parent_uid'] == $s['node_pid']) {
+                    $nested[] = &$s;
+                    $nestedType = 2;
                 } else {
                     $pid = $s['node_pid'];
                     if ( isset($source[$pid]) ) {
@@ -88,7 +91,7 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
             /*if(count($nested)===0) {
                 $nested[] = &$s;
             }*/
-            return $nested;
+            return array($nested, $nestedType);
         } catch(Exception $e) {
             echo 'Message: ' .$e->getMessage();
         }
