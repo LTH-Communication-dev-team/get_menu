@@ -62,7 +62,7 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
     
     function makeNested($source) {
         $i = 0;
-        $nestedType = 1;
+        $nestedType = 'one';
         try {
             $nested = array();
             foreach ( $source as &$s ) {
@@ -71,7 +71,7 @@ ON node.lft BETWEEN parent.lft AND parent.rgt
                     $nested[] = &$s;
                 } else if($s['parent_uid'] == $s['node_pid']) {
                     $nested[] = &$s;
-                    $nestedType = 2;
+                    $nestedType = 'two';
                 } else {
                     $pid = $s['node_pid'];
                     if ( isset($source[$pid]) ) {
