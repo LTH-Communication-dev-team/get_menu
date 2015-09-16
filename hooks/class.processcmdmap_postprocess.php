@@ -3,7 +3,7 @@ class user_processCmdmap_postProcess {
     
     public function processCmdmap_postProcess($command, $table, $node_uid, $parent_uid, $pObj)
     {
-        $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => "$command, $table, $node_uid, $parent_uid", 'crdate' => time()));
+        //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => "$command, $table, $node_uid, $parent_uid", 'crdate' => time()));
 	if($table=='pages') {
 	    switch ($command) {
 		case 'move':
@@ -358,39 +358,4 @@ INSERT INTO nested_category(name, lft, rgt) VALUES('GAME CONSOLES', @myRight + 1
             $get_menuObj->clearMenuCache($rootId);
         }
     }
-    
-    
-    /*private function getTargetPage($parent_uid, $pid)
-    {
-        $unix_timestamp = time();
-	//$limit = '0,1';
-	if(substr($parent_uid, 0,1) === '-') {
-	    $retVal = 'after_node';
-	    $parent_uid = substr($parent_uid, 1);
-	} else {
-	    $retVal = 'before_node';
-	    //$limit = '1,1';
-	}
-        
-	$sql = "SELECT node.uid AS node_uid, node.lft AS node_lft, node.rgt AS node_rgt, parent.uid AS parent_uid, parent.lft AS parent_lft, 
-            parent.rgt AS parent_rgt 
-            FROM pages AS node JOIN pages AS parent ON node.uid = parent.pid AND node.hidden=0 AND node.deleted=0 
-            AND node.hidden=0 AND node.starttime<=$unix_timestamp AND
-            (node.endtime=0 OR node.endtime>$unix_timestamp) 
-            AND NOT node.t3ver_state>0 AND node.doktype<200 AND (node.fe_group='' 
-            OR node.fe_group IS NULL OR node.fe_group='0' OR FIND_IN_SET('0',node.fe_group) OR FIND_IN_SET('-1',node.fe_group))
-            WHERE parent.uid=$parent_uid ORDER BY parent.sorting";
-        
-	$res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
-        $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
-	if(isset($row['node_uid'])) {
-	    if($retVal == 'before_node') {
-		return array($row['parent_uid'], $row['parent_lft'], $row['parent_rgt'], $retVal);
-	    } else {
-		return array($row['node_uid'], $row['node_lft'], $row['node_rgt'], $retVal);
-	    }
-	} else {
-	    return false;
-	}
-    }*/
 }
