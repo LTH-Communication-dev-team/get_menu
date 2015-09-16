@@ -77,7 +77,7 @@ class get_menu_functions {
             FROM pages AS node
             LEFT JOIN tx_realurl_pathcache AS PC ON node.uid = PC.page_id
             LEFT JOIN tx_realurl_urldecodecache AS UDC ON node.uid = UDC.page_id
-            LEFT JOIN sys_domain AS SD ON SD.pid = node.root
+            LEFT JOIN sys_domain AS SD ON SD.pid = node.root OR SD.pid = (SELECT pid FROM pages WHERE uid = (SELECT root FROM pages WHERE uid = $uid_page))
             WHERE node.uid = $uid_page
         ";
         $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);

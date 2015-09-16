@@ -3,7 +3,7 @@ class user_processCmdmap_postProcess {
     
     public function processCmdmap_postProcess($command, $table, $node_uid, $parent_uid, $pObj)
     {
-        //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => "$command, $table, $node_uid, $parent_uid", 'crdate' => time()));
+        $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => "$command, $table, $node_uid, $parent_uid", 'crdate' => time()));
 	if($table=='pages') {
 	    switch ($command) {
 		case 'move':
