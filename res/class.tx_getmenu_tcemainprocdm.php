@@ -42,7 +42,7 @@ class tx_getmenu_tcemainprocdm {
     function clearCachePostProc($_params, $pObj)
     {
 	//var_dump($pObj);
-        //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $_params['cacheCmd']. ','.$_params['table']. ','.$_params['uid_page'], 'crdate' => time()));
+        //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => '45' . $_params['cacheCmd']. ','.$_params['table']. ','.$_params['uid_page'], 'crdate' => time()));
 
         $uid_page = $_params['uid_page'];
         $get_menuObj = new get_menu_functions;
@@ -78,13 +78,11 @@ class tx_getmenu_tcemainprocdm {
                         }
                     }
                 }
-                
 	    } else if($_params['table']=='tt_content') {
 		//content has been added or updated ...
                 $get_menuObj->clearVarnishCacheForPage($uid_page);
 	    } else if(is_numeric($_params['cacheCmd'])) {
                 //User is clearing cache for specific page
-                //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $uid_page, 'crdate' => time()));
                 $get_menuObj->clearVarnishCacheForPage($_params['cacheCmd']);
             }
 	}
