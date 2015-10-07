@@ -4,7 +4,8 @@ class user_processCmdmap_postProcess {
     public function processCmdmap_postProcess($command, $table, $node_uid, $parent_uid, $pObj)
     {
         //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => "$command, $table, $node_uid, $parent_uid", 'crdate' => time()));
-	if($table=='pages') {
+	//copy, pages, 23710, -1352
+        if($table=='pages') {
 	    switch ($command) {
 		case 'move':
                     if(substr($parent_uid, 0,1) === '-') {
@@ -218,6 +219,7 @@ class user_processCmdmap_postProcess {
     
     private function copyNodeAfter($oldItemId, $newSiblingId)
     {
+        
         $sql = "LOCK TABLE pages WRITE";
         $GLOBALS['TYPO3_DB'] -> sql_query($sql);
         
