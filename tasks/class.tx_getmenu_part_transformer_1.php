@@ -5,7 +5,7 @@
      * @created 2008-11-04
      * @url     http://gen5.info/q/2008/11/04/nested-sets-php-verb-objects-and-noun-objects/
      */
-    class tx_getmenu_tree_transformer extends tx_scheduler_Task {
+    class tx_getmenu_part_transformer_1 extends tx_scheduler_Task {
 	private $i_count;
         private $a_link;
 	
@@ -33,10 +33,28 @@
 	    $executionSucceeded = FALSE;
             
 	    tslib_eidtools::connectDB();
-
-	    // build a complete copy of the adjacency table in ram
+            
+            $sql = "SELECT DISTINCT root FROM pages WHERE root > 0 AND deleted = 0 LIMIT 0,100";
+            $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+            while ($row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res)) {
+                $this->getPages($row['root']);
+            }
+            $GLOBALS['TYPO3_DB']->sql_free_result($res);
+            
+            //$this->addRootId();
+	    
+	    $executionSucceeded = TRUE;
+	    
+	    return $executionSucceeded;
+        }
+        
+        
+        private function getPages($root)
+        {
+// build a complete copy of the adjacency table in ram
             $a_link = array();
-            $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('uid, pid', 'pages', 'doktype<254', '', 'sorting');
+            $i_count = 0;
+            $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('uid, pid', 'pages', 'doktype < 254 AND root = ' . $root);
             while ($row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res)) {
                 //$a_rows[] = $row;
                 $i_father_id = $row['pid'];
@@ -54,12 +72,6 @@
             $this->i_count = 1;
             $this->a_link = $a_link;
 	    $this->traverse(0);
-            
-            $this->addRootId();
-	    
-	    $executionSucceeded = TRUE;
-	    
-	    return $executionSucceeded;
         }
 
         

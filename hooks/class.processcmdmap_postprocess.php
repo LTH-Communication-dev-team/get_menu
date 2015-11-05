@@ -1,6 +1,6 @@
 <?php
 class user_processCmdmap_postProcess {
-     public function processCmdmap_afterFinish($pObj)
+    public function processCmdmap_afterFinish($pObj)
     {
         $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('uid, queue, command', 'pages', 'queue IS NOT NULL');
         while ($row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res)) {

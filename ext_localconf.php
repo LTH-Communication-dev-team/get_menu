@@ -49,6 +49,24 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['scheduler']['tasks']['tx_getmenu_tree
 	'description'      => '',
 	'additionalFields' => '',
 );
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['scheduler']['tasks']['tx_getmenu_part_transformer_1'] = array(
+	'extension'        => 'get_menu',
+	'title'            => 'Part of tree transformer 1',
+	'description'      => '',
+	'additionalFields' => '',
+);
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['scheduler']['tasks']['tx_getmenu_part_transformer_2'] = array(
+	'extension'        => 'get_menu',
+	'title'            => 'Part of tree transformer 2',
+	'description'      => '',
+	'additionalFields' => '',
+);
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['scheduler']['tasks']['tx_getmenu_part_transformer_3'] = array(
+	'extension'        => 'get_menu',
+	'title'            => 'Part of tree transformer 3',
+	'description'      => '',
+	'additionalFields' => '',
+);
 
 
 //***********************************************AJAX
