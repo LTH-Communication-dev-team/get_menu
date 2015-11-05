@@ -36,14 +36,9 @@
 
 	    // build a complete copy of the adjacency table in ram
             $unix_timestamp = time();
-	    /*$s_query = "SELECT uid,pid FROM pages 
-                WHERE deleted = 0 AND NOT t3ver_state>0 AND doktype<199
-                ORDER BY sorting";*/
-	    //$i_result = mysql_query($s_query);
-	    //$a_rows = array();
             $a_link = array();
-	    //while ($a_rows[] = mysql_fetch_assoc($i_result));*/
-            $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('uid, pid', 'pages', 'deleted = 0 AND hidden = 0 AND NOT t3ver_state>0', '', 'sorting');
+            $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('uid, pid', 'pages', 
+                    'doktype<254', '', 'sorting');
             while ($row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res)) {
                 //$a_rows[] = $row;
                 $i_father_id = $row['pid'];
@@ -55,19 +50,11 @@
             }
             $GLOBALS['TYPO3_DB']->sql_free_result($res);
 	    
-
-	   /* foreach($a_rows as $a_row) 
-	    {
-		
-	    }*/
-	    
 	    if(!is_array($a_link)) {
                 throw new Exception("First parameter should be an array. Instead, it was type '".gettype($a_link)."'");
             }
             $this->i_count = 1;
             $this->a_link = $a_link;
-	    //print_r($this->a_link);
-	    //$o_tree_transformer = new tree_transformer($a_link);
 	    $this->traverse(0);
             
             $this->addRootId();
@@ -75,7 +62,7 @@
 	    $executionSucceeded = TRUE;
 	    
 	    return $executionSucceeded;
-        }   
+        }
 
         
         private function get_children($i_id) 
@@ -142,7 +129,7 @@
         
         function addRootId()
         {
-            $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('uid', 'pages', 'deleted=0 AND hidden = 0 AND NOT t3ver_state > 0', '', 'sorting');
+            $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('uid', 'pages', '', '', 'sorting');
             while ($row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res)) {
                 $rootid = $this->getRoot($row['uid']);
                 if($rootid!==false) {

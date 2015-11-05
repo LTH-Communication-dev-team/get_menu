@@ -1,21 +1,36 @@
 <?php
 class user_processCmdmap_postProcess {
+     public function processCmdmap_afterFinish($pObj)
+    {
+        $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('uid, queue, command', 'pages', 'queue IS NOT NULL');
+        while ($row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res)) {
+            $node_uid = $row['uid'];
+            $parent_uid = $row['queue'];
+            $command = $row['command'];
+            $this->moveNode($node_uid, $parent_uid, $command);
+        }
+        $GLOBALS['TYPO3_DB']->exec_UPDATEquery('pages', '', array('queue' => NULL));
+        //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => "$node_uid, $parent_uid", 'crdate' => time()));
+//move
+    }
     
     public function processCmdmap_postProcess($command, $table, $node_uid, $parent_uid, $pObj)
     {
         //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => "$command, $table, $node_uid, $parent_uid", 'crdate' => time()));
-	//copy, pages, 23710, -1352
+//move, pages, 150, -182
         if($table=='pages') {
 	    switch ($command) {
 		case 'move':
-                    if(substr($parent_uid, 0,1) === '-') {
-                        $parent_uid = substr($parent_uid, 1);
-                        $this->moveNodeAfter($node_uid, $parent_uid);
-                    } else {
-                        $this->moveNodeDirectUnderParent($node_uid, $parent_uid);
-                    }
-		    break;
                 case 'copy':
+                    /*if($parent_uid < 1) {
+                        //$this->moveNodeAfter($node_uid, abs($parent_uid));
+                        $this->storeUpdate($node_uid, abs($parent_uid));
+                    } else {
+                        $this->storeUpdate($node_uid, $parent_uid);
+                    }*/
+                    $this->storeUpdate($node_uid, $parent_uid, $command);
+		    break;
+                /*case 'copy':
                     if(substr($parent_uid, 0,1) === '-') {
                         $parent_uid = substr($parent_uid, 1);
                         $this->copyNodeAfter($node_uid, $parent_uid);
@@ -25,33 +40,64 @@ class user_processCmdmap_postProcess {
 		    break;
 		case 'delete':
 		    $this->deleteNode($node_uid);
-		    break;
+		    break;*/
 	    }
 	}
     }
     
     
+    private function storeUpdate($node_uid, $parent_uid, $command)
+    {
+        if($node_uid && $parent_uid) {
+            $GLOBALS['TYPO3_DB']->exec_UPDATEquery('pages', 'uid='.intval($node_uid), array('queue' => $parent_uid, 'command' => $command));
+        }
+    }
+    
+    
     private function moveNodeDirectUnderParent($itemId, $newSiblingId)
     {
+       // $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => "37:$itemId, $newSiblingId", 'crdate' => time()));
         $sql = "LOCK TABLE pages WRITE";
-        $GLOBALS['TYPO3_DB'] -> sql_query($sql);  
+        $GLOBALS['TYPO3_DB'] -> sql_query($sql);
         
-        $sql = "SELECT lft, root FROM pages WHERE uid = $newSiblingId";
+        //$sql = "SELECT lft AS oldLeft, rgt AS oldRight FROM pages WHERE uid = $itemId LIMIT 1";
+        $sql = "SELECT GROUP_CONCAT(node.uid) AS nodes, parent.lft AS oldLft
+            FROM pages AS node
+            JOIN pages AS parent ON node.lft BETWEEN parent.lft AND parent.rgt
+            WHERE parent.uid = " . intval($itemId);
+        $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+        $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
+        if(isset($row['oldLeft']) and isset($row['nodes'])) {
+            $oldLft = $row['oldLft'];
+            //$sql = "UPDATE pages SET rgt=rgt*-1, lft=lft*-1 WHERE lft BETWEEN $oldLeft AND $oldRight";
+            $sql = "UPDATE pages SET rgt=rgt*-1, lft=lft*-1 WHERE uid IN($nodes)";
+            $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+        }
+        
+        $sql = "SELECT lft, root FROM pages WHERE uid = " . intval($newSiblingId);
         $st = $sql;
         $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
         $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
         if(isset($row['lft'])) {
             $lft = $row['lft'];
-            $newRoot =  $row['root'];
+            $root =  $row['root'];
             $sql = "UPDATE pages SET rgt = rgt + 2 WHERE rgt > $lft";
             $st .= $sql;
             $GLOBALS['TYPO3_DB'] -> sql_query($sql);
             $sql = "UPDATE pages SET lft = lft + 2 WHERE lft > $lft";
             $st .= $sql;
             $GLOBALS['TYPO3_DB'] -> sql_query($sql);
-            $sql = "UPDATE pages SET lft = $lft + 1, rgt = $lft + 2, root = $newRoot, pid = $newSiblingId WHERE uid = $itemId";
-            $st .= $sql;
+            
+            $moveBy = $oldLft - $lft;
+            //$sql = "UPDATE pages SET rgt=(rgt* -1)-$moveBy, lft=(lft* -1)-$moveBy, root = $newRoot WHERE lft < 0";
+            $sql = "UPDATE pages SET rgt=(rgt* -1)-$moveBy, lft=(lft* -1)-$moveBy, root = $root WHERE uid in($nodes)";
             $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+            /*$sql = "UPDATE pages SET pid = $newSiblingId, root = $newRoot WHERE uid = $itemId";
+            $GLOBALS['TYPO3_DB'] -> sql_query($sql);*/
+            
+            /*$sql = "UPDATE pages SET lft = $lft + 1, rgt = $lft + 2, root = $newRoot, pid = $newSiblingId WHERE uid = $itemId";
+            $st .= $sql;
+            $GLOBALS['TYPO3_DB'] -> sql_query($sql);*/
         }
         
         $sql = "UNLOCK TABLES";
@@ -70,12 +116,12 @@ class user_processCmdmap_postProcess {
     }
     
     
-    private function copyNodeDirectUnderParent($oldItemId, $newSiblingId)
+    /*private function copyNodeDirectUnderParent($itemId, $newSiblingId)
     {        
         $sql = "LOCK TABLE pages WRITE";
         $GLOBALS['TYPO3_DB'] -> sql_query($sql);
         
-        $itemId = $this->getClonedNode($oldItemId);
+        $itemIdArray = $this->getClonedNodes($itemId);
         
         $sql = "SELECT lft, root FROM pages WHERE uid = $newSiblingId";
         $st = $sql;
@@ -108,125 +154,317 @@ class user_processCmdmap_postProcess {
         
         ////$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $st, 'crdate' => time()));
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
+     * 
+    }*/
+    
+    
+    private function debug($msg)
+    {
+        $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $msg, 'crdate' => time()));
     }
+    
+    
+    /*private function copyNode($node_id, $parent_id)
+    {
+        $sql = "SELECT rgt, root FROM pages WHERE uid = " . $parent_id;
+        $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+        $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
+        $rgt = $row['rgt'];
+        $root = $row['root'];
+
+        $sql = "UPDATE pages SET rgt = rgt + 2 WHERE rgt > " . $rgt;
+        $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+        
+        $sql = "UPDATE pages SET lft = lft + 2 WHERE lft > " . $rgt;
+        $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+
+        $sql = "UPDATE pages SET lft = " . $rgt + 1 . ",rgt = " . $rgt + 2 . ", root = " . $root;
+        $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+    }*/
      
     
-    private function moveNodeAfter($itemId, $newSiblingId)
-    {
-        $sql = "LOCK TABLE pages WRITE";
-        $GLOBALS['TYPO3_DB'] -> sql_query($sql);        
+    private function moveNode($node_id, $parent_id, $command)
+    {                
+        //$this->debug("$node_id, $parent_id, $command");
+        $sql = "SELECT lft, rgt, root, pid FROM pages WHERE uid = " . intval($node_id);
+        $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+        $row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res);
+        $node_pos_left = $row['lft'];
+        $node_pos_right = $row['rgt'];
+        $node_root = $row['root'];
+        $node_pid = $row['pid'];
         
-        $sql = "SELECT pid AS newParentId, root FROM pages WHERE uid = $newSiblingId";
-        $st = $sql;
+        if($parent_uid < 1) {
+            $sql = "SELECT lft, rgt, root FROM pages WHERE uid = (SELECT pid FROM pages WHERE uid = " . abs($parent_id) . ")";
+        } else {
+            $sql = "SELECT lft, rgt, root FROM pages WHERE uid = " . intval($parent_id);
+        }
         $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
         $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
-        $newParentId = $row['newParentId'];
-        $newRoot = $row['root'];
-
-        $sql = "SELECT lft AS oldLeft, rgt AS oldRight FROM pages WHERE uid = $itemId LIMIT 1";
-        $st .= $sql;
-        $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
-        $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
-        if(isset($row['oldLeft']) and isset($row['oldRight'])) {
-
-            $oldLeft = $row['oldLeft'];
-            $oldRight = $row['oldRight'];
-            $itemWidth = ($oldRight - $oldLeft) + 1;
-            
-            $sql = "UPDATE pages SET rgt=rgt*-1, lft=lft*-1 WHERE lft BETWEEN $oldLeft AND $oldRight";
-            $st .= $sql;
-            $GLOBALS['TYPO3_DB'] -> sql_query($sql);
-
-            //if($command=='move') {
-                //Update right
-                $sql = "UPDATE pages SET rgt = rgt - $itemWidth WHERE rgt > $oldRight";
-                $st .= $sql;
-                $GLOBALS['TYPO3_DB'] -> sql_query($sql);
-
-                //Update left
-                $sql = "UPDATE pages SET lft = lft - $itemWidth WHERE lft > $oldRight";
-                $st .= $sql;
-                $GLOBALS['TYPO3_DB'] -> sql_query($sql);
-            //}
-
-            $sql = "SELECT (rgt+1) AS newLeft FROM pages  WHERE uid =$newSiblingId LIMIT 1";
+        $parent_pos_left = $row['lft'];
+        $parent_pos_right = $row['rgt'];
+        $parent_root = $row['root'];
+        
+        if(!$node_pos_left) {
+            //New page!
+            if($node_pid > 0) {
+                $sql = "UPDATE pages SET rgt = rgt + 2 WHERE rgt > " . $parent_pos_right;
+                $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
                 
-            $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
-            $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
-            if(isset($row['newLeft'])) {
-                $newLeft = $row['newLeft'];
-            } else if ($newLeft == 0 and $newParentId != 0) {
-                $sql = "SELECT rgt AS newLeft FROM pages WHERE uid=$newParentId LIMIT 1";
+                $sql = "UPDATE pages SET lft = lft + 2 WHERE lft > " . $parent_pos_right;
+                $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+                
+                $sql = "UPDATE pages SET lft = " . ($parent_pos_right + 1) . ", rgt = " . ($parent_pos_right + 2) . ", root = " . $parent_root . " WHERE uid = " . $node_id;
+                $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+            } else {
+                //Top level! Get page above
+                $sql = "SELECT lft, rgt, root FROM pages WHERE uid = " . abs($parent_id);
                 $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
                 $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
-                $newLeft = $row['newLeft'];
+                $node_pos_right = $row['rgt'];
+                $node_root = $row['root'];
+                
+                $sql = "UPDATE pages SET rgt = rgt + 2 WHERE rgt > " . $node_pos_right;
+                $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+                
+                $sql = "UPDATE pages SET lft = lft + 2 WHERE lft > " . $node_pos_right;
+                $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+                
+                $sql = "UPDATE pages SET lft = " . ($node_pos_right + 1) . ", rgt = " . ($node_pos_right + 2) . ", root = " . $node_root . " WHERE uid = " . $node_id;
+                $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+            }
+            return 'new page';
+        }
+        
+        $node_size = intval($node_pos_right) - intval($node_pos_left) + 1; // 'size' of moving node (including all it's sub nodes)
+        
+        if($command==='copy') {
+            //Get new id
+            $sql = "SELECT GROUP_CONCAT(node.uid) AS uids FROM pages node JOIN pages parent ON node.lft BETWEEN parent.lft AND parent.rgt WHERE parent.uid = (" .
+                    "SELECT uid FROM pages WHERE lft = " . $node_pos_left . " AND rgt = " . $node_pos_right . " AND root = " . $node_root . " ORDER BY uid DESC LIMIT 1" .
+                ")";
+            $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+            $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
+            $uids = $row['uids'];
+            if($uids) {
+                $uidsArray = explode(',', $uids);
+                $len = count($uidsArray);
+                
+                $firstHalf = array_slice($uidsArray, 0, $len / 2);
+                $secondHalf = array_slice($uidsArray, $len / 2);
+                $uids = implode(',', $secondHalf);
+                $copyUids = "";// OR uid IN(" . implode(',', $firstHalf) . ") ";
+            }
+            $sql = "UPDATE pages SET lft = 0-(lft), rgt = 0-(rgt) WHERE uid IN(" . $uids . ")";
+        } else {
+            $sql = "UPDATE pages SET lft = 0-(lft), rgt = 0-(rgt) WHERE lft >= $node_pos_left AND rgt <= " . $node_pos_right;
+        }
+        
+        $lsql = "LOCK TABLE pages WRITE";
+        $GLOBALS['TYPO3_DB'] -> sql_query($lsql);
+        
+        //step 1: temporary "remove" moving node
+        //WHERE `pos_left` >= @node_pos_left AND `pos_right` <= @node_pos_right;
+        
+        $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+        //echo $sql;
+           
+        //# step 2: decrease left and/or right position values of currently 'lower' items (and parents)
+        //$updateArray = array('lft' => 'lft - ' . $node_size);
+        if($command==='move') {
+            $sql = "UPDATE pages SET lft = lft - " . $node_size . " WHERE lft > " . $node_pos_right . $copyUids;
+            $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+            //$this->debug($sql);
+
+            //$updateArray = array('rgt' => 'rgt - ' . $node_size);
+            $sql = "UPDATE pages SET rgt = rgt - " . $node_size . " WHERE rgt > " . $node_pos_right . $copyUids;
+            $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+            //echo $sql;
+        }
+        
+        //step 3: increase left and/or right position values of future 'lower' items (and parents)
+        //$updateArray = array('lft' => lft + $node_size);
+        if($parent_pos_right > $node_pos_right) {
+            //$updateWhere = lft >= strval(intval($parent_pos_right) - intval($node_size));
+            $sPos = intval($parent_pos_right) - intval($node_size);
+            $sql = "UPDATE pages SET lft = lft + " . $node_size . " WHERE lft >= " . $sPos . $copyUids;
+        } else {
+            //$updateWhere = lft >= (string)$parent_pos_right;
+            $sql = "UPDATE pages SET lft = lft + " . $node_size . " WHERE lft >= " . $parent_pos_right . $copyUids;
+        }
+        $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+        //$GLOBALS['TYPO3_DB']->exec_UPDATEquery('pages', (string)$updateWhere, $updateArray);
+        //echo $sPos.';'.$sql;
+
+        //$updateArray = array('rgt' => rgt + $node_size);
+        if($parent_pos_right > $node_pos_right) {
+            //$updateWhere = lft >= strval(intval($parent_pos_right) - intval($node_size));
+            $sPos = intval($parent_pos_right) - intval($node_size);
+            $sql = "UPDATE pages SET rgt = rgt + " . $node_size . " WHERE lft >= " . $sPos . $copyUids;
+        } else {
+            //$updateWhere = lft >= (string)$parent_pos_right;
+            $sql = "UPDATE pages SET rgt = rgt + " . $node_size . " WHERE lft >= " . $parent_pos_right . $copyUids;
+        } 
+        //$GLOBALS['TYPO3_DB']->exec_UPDATEquery('pages', (string)$updateWhere, $updateArray);
+        $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+        //echo $sql;
+
+        //step 4: move node (and it's subnodes)
+        if($parent_pos_right > $node_pos_right) {
+            $newPos = intval($parent_pos_right) - intval($node_pos_right) - 1;
+        } else {
+            $newPos = intval($parent_pos_right) - intval($node_pos_right) - 1 + intval($node_size);
+        }
+        if($command==='copy') {
+            $sql = "UPDATE pages SET lft = 0-(lft) + " . $newPos . ", rgt = 0-(rgt) + " . $newPos . ", root = " . $parent_root . " WHERE uid IN(" . $uids . ")";
+        } else {
+            $sql = "UPDATE pages SET lft = 0-(lft) + " . $newPos . ", rgt = 0-(rgt) + " . $newPos . ", root = " . $parent_root . " WHERE lft <= 0-".$node_pos_left." AND rgt >= 0-" . $node_pos_right;
+        }
+        $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+
+        //$updateArray = array('lft' => 0-(lft)+$newPosLeft, 'rgt' => 0-(rgt)+$newPosRight, 'root' => $parent_root);
+        //$GLOBALS['TYPO3_DB']->exec_UPDATEquery('pages', 'lft <= 0-'.(string)$node_pos_left . ' AND rgt >= 0-' . (string)$node_pos_right, $updateArray);
+        //echo $sql;
+        
+        $lsql = "UNLOCK TABLES";
+        $GLOBALS['TYPO3_DB'] -> sql_query($lsql);
+        
+                            //$this->debug($sql);
+
+
+            /*@node_id := $itemId, #put there id of moving node 
+    @node_pos_left := $oldLft, #put there left position of moving node
+    @node_pos_right := $oldRgt, #put there right position of moving node
+    @parent_id := $newSiblingId, #put there id of new parent node (there moving node should be moved)
+
+    @parent_pos_right := $newRgt; #put there right position of new parent node (there moving node should be moved)
+SELECT         
+        //if(count($uidArray)>200) die();
+        //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $oldLft . $oldRgt . implode(',',$uidArray), 'crdate' => time()));
+        //$sql = "LOCK TABLE pages WRITE";
+        //$GLOBALS['TYPO3_DB'] -> sql_query($sql);
+        
+        //$sql = "SELECT pid AS newParentId, root FROM pages WHERE uid = $newSiblingId";
+
+
+ * SELECT pid AS newParentId, root FROM pages WHERE uid = 182
+ * SELECT GROUP_CONCAT(node.uid) AS nodes, parent.lft AS oldLft, parent.rgt AS oldRgt
+            FROM pages AS node
+            JOIN pages AS parent ON node.lft BETWEEN parent.lft AND parent.rgt
+            WHERE parent.uid = 134
+ 
+        //$sql = "SELECT lft AS oldLeft, rgt AS oldRight FROM pages WHERE uid = $itemId LIMIT 1";
+ 
+        /*$sql = "SELECT node.uid AS uid, parent.lft AS oldLft, parent.rgt AS oldRgt " .
+            "FROM pages AS node " .
+            "JOIN pages AS parent ON node.lft BETWEEN parent.lft AND parent.rgt " .
+            "WHERE parent.uid = " . intval($itemId);
+        $st .= $sql;
+        $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+               
+        if(is_array($uidArray)) {
+            $uidArray = array_unique($uidArray);
+            //$oldLft = $row['oldLft'];
+            //$oldRgt = $row['oldRgt'];
+            $nodes = implode(',', $uidArray);
+            $itemWidth = ($oldRgt - $oldLft) + 1;
+
+            //$sql = "UPDATE pages SET rgt=rgt*-1, lft=lft*-1 WHERE lft BETWEEN $oldLeft AND $oldRight";
+            //$sql = "UPDATE pages SET rgt=rgt*-1, lft=lft*-1 WHERE uid IN($nodes)";
+            //$st .= $sql;
+            //$GLOBALS['TYPO3_DB'] -> sql_query($sql);
+            $updateArray = array('rgt' => 'rgt*-1', 'lft' => 'lft*-1');
+            $GLOBALS['TYPO3_DB']->exec_UPDATEquery('pages', 'uid IN(' . $nodes . ')', $updateArray);
+            //if($command=='move') {
+                //Update right
+                //$sql = "UPDATE pages SET rgt = rgt - $itemWidth WHERE rgt > $oldRgt";
+                //$st .= $sql;
+                //$GLOBALS['TYPO3_DB'] -> sql_query($sql);
+            $updateArray = array('rgt' => 'rgt - ' . $itemWidth);
+            $GLOBALS['TYPO3_DB']->exec_UPDATEquery('pages', 'rgt > '.$oldRgt, $updateArray);
+            
+            $updateArray = array('lft' => 'lft - ' . $itemWidth);
+            $GLOBALS['TYPO3_DB']->exec_UPDATEquery('pages', 'lft > '.$oldRgt, $updateArray);
+
+                //Update left
+                //$sql = "UPDATE pages SET lft = lft - $itemWidth WHERE lft > $oldRgt";
+                //$st .= $sql;
+                //$GLOBALS['TYPO3_DB'] -> sql_query($sql);
+            //}
+
+            /*$sql = "SELECT (rgt+1) AS newLeft FROM pages  WHERE uid = $newSiblingId";
+            //$st .= $sql;
+            //$res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+            $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('(rgt+1) AS newLft', 'pages', 'uid = ' . $newSiblingId);
+            $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
+            if(isset($row['newLft'])) {
+                $newLft = $row['newLft'];
+            } else if ($newLft == 0 && $newParentId != 0) {
+                //$sql = "SELECT rgt AS newLft FROM pages WHERE uid=$newParentId";
+                //$st .= $sql;
+                //$res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+                $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('rgt AS newLft', 'pages', 'uid = ' . $newParentId);
+                $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
+                $newLft = $row['newLft'];
             }
 
             //If no previous sibling or parent, set to first item in tree
-            if ($newLeft===0 or $newLeft===null) {
-                $newLeft=1;
+            if ($newLft===0 || $newLft===null) {
+                $newLft=1;
             }
 
             //Update right
-            $sql = "UPDATE pages SET rgt = rgt + $itemWidth WHERE rgt >= $newLeft";
-            $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+            $updateArray = array('rgt' => 'rgt + ' . $itemWidth);
+            //$sql = "UPDATE pages SET rgt = rgt + $itemWidth WHERE rgt >= $newLft";
+            //$st .= $sql;
+            //$GLOBALS['TYPO3_DB'] -> sql_query($sql);
+            $GLOBALS['TYPO3_DB']->exec_UPDATEquery('pages', 'rgt >= ' . $newLft, $updateArray);
 
             //Update left
-            $sql = "UPDATE pages SET lft = lft + $itemWidth WHERE lft >= $newLeft";
-            $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+            $updateArray = array('lft' => 'lft + ' . $itemWidth);
+            $GLOBALS['TYPO3_DB']->exec_UPDATEquery('pages', 'lft >= ' . $newLft, $updateArray);
+            //$sql = "UPDATE pages SET lft = lft + $itemWidth WHERE lft >= $newLft";
+            //$st .= $sql;
+            //$GLOBALS['TYPO3_DB'] -> sql_query($sql);
              //echo $newLeft;
 
-            $moveBy = $oldLeft - $newLeft;
-            $sql = "UPDATE pages SET rgt=(rgt* -1)-$moveBy, lft=(lft* -1)-$moveBy, root = $newRoot WHERE lft < 0";
-            $GLOBALS['TYPO3_DB'] -> sql_query($sql);
-            $sql = "UPDATE pages SET pid = $newParentId WHERE uid = $itemId";
+            $moveBy = $oldLft - $newLft;
+            //$sql = "UPDATE pages SET rgt=(rgt* -1)-$moveBy, lft=(lft* -1)-$moveBy, root = $newRoot WHERE lft < 0";
+            //$sql = "UPDATE pages SET rgt=(rgt* -1)-$moveBy, lft=(lft* -1)-$moveBy, root = $newRoot WHERE uid IN($nodes)";
+            //$st .= $sql;
+            //$GLOBALS['TYPO3_DB'] -> sql_query($sql);
+            $updateArray = array('rgt' => '(rgt* -1)-' . $moveBy, 'lft' => '(lft* -1)-' . $moveBy, 'root' => $newRoot);
+            $GLOBALS['TYPO3_DB']->exec_UPDATEquery('pages', 'uid IN('.$nodes.')', $updateArray);
+            /*$sql = "UPDATE pages SET pid = $newParentId, root = $newRoot WHERE uid = $itemId";
             $GLOBALS['TYPO3_DB'] -> sql_query($sql);
             
-        } /*else {
-            $sql = "SELECT rgt FROM pages WHERE uid = $newSiblingId";
-            $st = $sql;
-            $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
-            $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
-            if(isset($row['rgt'])) {
-                $rgt = $row['rgt'];
-                $sql = "UPDATE pages SET rgt = rgt + 2 WHERE rgt > $rgt";
-                $st .= $sql;
-                $GLOBALS['TYPO3_DB'] -> sql_query($sql);
-                $sql = "UPDATE pages SET lft = lft + 2 WHERE lft > $rgt";
-                $st .= $sql;
-                $GLOBALS['TYPO3_DB'] -> sql_query($sql);
-                $sql = "UPDATE pages SET lft = $rgt + 1, rgt = $rgt + 2, root = $newRoot, pid = $newParentId WHERE uid = $itemId";
-                //UPDATE pages SET lft = , rgt = 143 + 2 WHERE uid=1416
-                $st .= $sql;
-                $GLOBALS['TYPO3_DB'] -> sql_query($sql);
-            }
         }*/
       
-        $sql = "UNLOCK TABLES";
-        $GLOBALS['TYPO3_DB'] -> sql_query($sql);
-        
+        //$sql = "UNLOCK TABLES";
+        //$GLOBALS['TYPO3_DB'] -> sql_query($sql);
+        //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $st, 'crdate' => time()));
         $get_menuObj = new get_menu_functions;
-        $get_menuObj->clearVarnishCacheForDomain($itemId);
+        $get_menuObj->clearVarnishCacheForDomain($node_id);
             
         //Clear hamburger cache
         if($newRoot) {
-            $get_menuObj->clearMenuCache($newRoot);
+            $get_menuObj->clearMenuCache($parent_root);
         }
         
-        //////$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $st, 'crdate' => time()));
     }
     
     
     private function copyNodeAfter($oldItemId, $newSiblingId)
     {
-        
+        //68,77
         $sql = "LOCK TABLE pages WRITE";
         $GLOBALS['TYPO3_DB'] -> sql_query($sql);
         
-        $itemId = $this->getClonedNode($oldItemId);
+        $itemIds = $this->getClonedNode($oldItemId);
         
-        $sql = "SELECT rgt, pid, root FROM pages WHERE uid = $newSiblingId";
-        $st = $itemId.$sql;
+        
+        $sql = "SELECT rgt, pid, root FROM pages WHERE uid = " . intval($newSiblingId);
+        $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
         $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
         if(isset($row['rgt'])) {
             $newRight = $row['rgt'];
@@ -243,7 +481,7 @@ class user_processCmdmap_postProcess {
             $st .= $sql;
             $GLOBALS['TYPO3_DB'] -> sql_query($sql);
             
-            $sql = "UPDATE pages SET lft = $newRight + 1, rgt = $newRight + 2, root = $newRoot, pid = $newPid WHERE uid = $itemId";
+            $sql = "UPDATE pages SET lft = $newRight + 1, rgt = $newRight + 2, root = $newRoot, pid = $newPid WHERE uid = " . $itemIds[0];
             $st .= $sql;
             $GLOBALS['TYPO3_DB'] -> sql_query($sql);
             
@@ -258,40 +496,36 @@ class user_processCmdmap_postProcess {
                 $get_menuObj->clearMenuCache($newRoot);
             }
 
-            //////$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $st, 'crdate' => time()));
+            $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $st, 'crdate' => time()));
         }
-        /*
-         * SELECT @myRight := rgt FROM nested_category
-WHERE name = 'TELEVISIONS';
-
-UPDATE nested_category SET rgt = rgt + 2 WHERE rgt > @myRight;
-UPDATE nested_category SET lft = lft + 2 WHERE lft > @myRight;
-
-INSERT INTO nested_category(name, lft, rgt) VALUES('GAME CONSOLES', @myRight + 1, @myRight + 2);
-
-         */
     }
 
-    private function getClonedNode($node_uid)
+    private function getClonedNodes($node_uid)
     {
-        $sql = "SELECT lft,rgt FROM pages WHERE uid=$node_uid";
+        $uidArray = array();
+        $sql = "SELECT p1.uid AS uid1, p2.uid AS uid2, p3.uid AS uid3, p4.uid AS uid4, p5.uid AS uid5, p6.uid AS uid6, p7.uid AS uid7, p8.uid AS uid8
+        FROM pages p1 
+        LEFT JOIN pages p2 ON p1.uid = p2.pid
+        LEFT JOIN pages p3 ON p2.uid = p3.pid
+        LEFT JOIN pages p4 ON p3.uid = p4.pid
+        LEFT JOIN pages p5 ON p4.uid = p5.pid
+        LEFT JOIN pages p6 ON p5.uid = p6.pid
+        LEFT JOIN pages p7 ON p6.uid = p7.pid
+        LEFT JOIN pages p8 ON p7.uid = p8.pid
+        WHERE p1.uid = " . intval($node_uid);
         $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
-        $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
-        if(isset($row['lft']) and isset($row['rgt'])) {
-            $lft = $row['lft'];
-            $rgt = $row['rgt'];
-            $sql = "SELECT uid FROM pages WHERE lft = $lft AND rgt = $rgt ORDER BY uid DESC LIMIT 1";
-            $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
-            $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
-            $GLOBALS['TYPO3_DB']->sql_free_result($res);
-            if(isset($row['uid'])) {
-                return $row['uid'];
-            } else {
-                return false;
-            }
-        } else {
-            return false;
+        while ($row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res)) {
+            if($row['uid1']) $uidArray[] = $row['uid1'];
+            if($row['uid2']) $uidArray[] = $row['uid2'];
+            if($row['uid3']) $uidArray[] = $row['uid3'];
+            if($row['uid4']) $uidArray[] = $row['uid4'];
+            if($row['uid5']) $uidArray[] = $row['uid5'];
+            if($row['uid6']) $uidArray[] = $row['uid6'];
+            if($row['uid7']) $uidArray[] = $row['uid7'];
+            if($row['uid8']) $uidArray[] = $row['uid8'];
         }
+        $uidArray = array_unique($uidArray);
+        return $uidArray;
     }
     
     private function deleteNode($node_uid)
@@ -300,8 +534,8 @@ INSERT INTO nested_category(name, lft, rgt) VALUES('GAME CONSOLES', @myRight + 1
         
         //$varnishClean = false;
         
-        $sql = "LOCK TABLE pages WRITE";
-	$GLOBALS['TYPO3_DB'] -> sql_query($sql);
+        //$sql = "LOCK TABLE pages WRITE";
+	//$GLOBALS['TYPO3_DB'] -> sql_query($sql);
 	
 	$sql = "SELECT uid
         FROM pages AS node join pages AS parent
@@ -348,8 +582,8 @@ INSERT INTO nested_category(name, lft, rgt) VALUES('GAME CONSOLES', @myRight + 1
 	    }
 	}
 	
-        $sql = "UNLOCK TABLES";
-	$GLOBALS['TYPO3_DB'] -> sql_query($sql);
+        //$sql = "UNLOCK TABLES";
+	//$GLOBALS['TYPO3_DB'] -> sql_query($sql);
         
         $get_menuObj = new get_menu_functions;
         $get_menuObj->clearVarnishCacheForDomain($node_uid);

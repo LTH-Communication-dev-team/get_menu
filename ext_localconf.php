@@ -12,9 +12,6 @@ $TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['postUserLookUp
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_extfilefunc.php']['processData'][] = 'EXT:get_menu/hooks/class.user_fileupload_hooks.php:user_fileUpload_hooks';
 // Uploads in uploads/
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processUpload'][] = 'EXT:get_menu/hooks/class.user_fileupload_hooks.php:user_fileUpload_hooks';
-// Uploads when using DAM
-$TYPO3_CONF_VARS['EXTCONF']['dam']['fileTriggerClasses'][] = 'EXT:get_menu/hooks/class.user_fileupload_hooks.php:user_fileUpload_hooks';
-
 
 //************************************************CLEARCACHEPOSTPROCESS*********************************************************************
 $GLOBALS ['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] = 'EXT:get_menu/res/class.tx_getmenu_tcemainprocdm.php:tx_getmenu_tcemainprocdm';
@@ -23,6 +20,7 @@ $TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['clearCachePostP
 
 
 //************************************************PROCESSCMDMAP******************************************************************************
+//$TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][] = 'EXT:get_menu/hooks/class.processcmdmap_postprocess.php:user_processCmdmap_postProcess';
 $TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][] = 'EXT:get_menu/hooks/class.processcmdmap_postprocess.php:user_processCmdmap_postProcess';
 
 
