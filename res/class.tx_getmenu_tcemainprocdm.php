@@ -83,7 +83,6 @@ class tx_getmenu_tcemainprocdm {
 	    } else if($_params['table']=='tt_content') {
 		//content has been added or updated ...
                 $get_menuObj->clearVarnishCacheForPage($uid_page);
-                echo $uid_page;
 	    } else if(is_numeric($_params['cacheCmd'])) {
                 //User is clearing cache for specific page
                 $get_menuObj->clearVarnishCacheForPage($_params['cacheCmd']);

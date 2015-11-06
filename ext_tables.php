@@ -51,6 +51,30 @@ $tempColumns = array(
 			'default' => null
 		)
 	),
+        'queue' => array(		
+                'exclude' => 0,		
+                'label' => 'LLL:EXT:get_menu/locallang_db.xml:pages.queue',		
+                'config' => array(
+                        'type'     => 'input',
+                        'size'     => '7',
+                        'max'      => '7',
+                        'eval'     => 'int',
+                        'checkbox' => '0',
+                        'range'    => array(
+                                'upper' => '100000000',
+                                'lower' => '0'
+                        ),
+                        'default' => null
+                )
+        ),
+        'command' => array (
+            'exclude' => 1,
+                'label' => 'LLL:EXT:get_menu/locallang_db.xml:pages.command',		
+            'config' => array (
+            'type' => 'input',
+            'maxchar' => 4
+          )
+        ),
 );
 
 

@@ -9,6 +9,8 @@
 			<label index="pages.lft">lft</label>
 			<label index="pages.rgt">rgt</label>
 			<label index="pages.root">root</label>
+                        <label index="pages.root">queue</label>
+                        <label index="pages.root">command</label>
 		</languageKey>
 	</data>
 </T3locallang>
