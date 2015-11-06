@@ -53,7 +53,7 @@ class tx_getmenu_tcemainprocdm {
 	    if($_params['table']==='pages') {
                 //Check if new page has been created directly under parent
 
-                $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('pid,lft,rgt', 'pages', 'uid='.$uid_page);
+               /* $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('pid,lft,rgt', 'pages', 'uid='.$uid_page);
                 $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
                 if(!isset($row['lft']) && !isset($row['rgt'])) {
                     $newParentId = $row['pid'];
@@ -77,12 +77,13 @@ class tx_getmenu_tcemainprocdm {
                             $get_menuObj->clearMenuCache($rootId);
                         }
                     }
-                } else if(isset($_params['uid_page'])) {
-                    //$get_menuObj->clearVarnishCacheForPage($_params['uid_page']);
+                } else */if(isset($_params['uid_page'])) {
+                    $get_menuObj->clearVarnishCacheForPage($_params['uid_page']);
                 }
 	    } else if($_params['table']=='tt_content') {
 		//content has been added or updated ...
-                //$get_menuObj->clearVarnishCacheForPage($uid_page);
+                $get_menuObj->clearVarnishCacheForPage($uid_page);
+                echo $uid_page;
 	    } else if(is_numeric($_params['cacheCmd'])) {
                 //User is clearing cache for specific page
                 $get_menuObj->clearVarnishCacheForPage($_params['cacheCmd']);
