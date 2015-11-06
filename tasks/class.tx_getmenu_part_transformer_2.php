@@ -34,7 +34,7 @@
             
 	    tslib_eidtools::connectDB();
             
-            $sql = "SELECT DISTINCT root FROM pages WHERE root > 0 AND deleted = 0 LIMIT 100,200";
+            $sql = "SELECT DISTINCT root FROM pages WHERE root > 0 AND deleted = 0 LIMIT 50,100";
             $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
             while ($row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res)) {
                 $this->getPages($row['root']);

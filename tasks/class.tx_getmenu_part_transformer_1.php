@@ -34,7 +34,7 @@
             
 	    tslib_eidtools::connectDB();
             
-            $sql = "SELECT DISTINCT root FROM pages WHERE root > 0 AND deleted = 0 LIMIT 0,100";
+            $sql = "SELECT DISTINCT root FROM pages WHERE root > 0 AND deleted = 0 LIMIT 0,50";
             $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
             while ($row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res)) {
                 $this->getPages($row['root']);
@@ -53,7 +53,7 @@
         {
 // build a complete copy of the adjacency table in ram
             $a_link = array();
-            $i_count = 0;
+            $this->i_count = 0;
             $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('uid, pid', 'pages', 'doktype < 254 AND root = ' . $root);
             while ($row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res)) {
                 //$a_rows[] = $row;
