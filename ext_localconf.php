@@ -14,9 +14,9 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_extfilefunc.php']['
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processUpload'][] = 'EXT:get_menu/hooks/class.user_fileupload_hooks.php:user_fileUpload_hooks';
 
 //************************************************CLEARCACHEPOSTPROCESS*********************************************************************
-$GLOBALS ['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] = 'EXT:get_menu/res/class.tx_getmenu_tcemainprocdm.php:tx_getmenu_tcemainprocdm';
+/*$GLOBALS ['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] = 'EXT:get_menu/res/class.tx_getmenu_tcemainprocdm.php:tx_getmenu_tcemainprocdm';
 require_once(t3lib_extMgm::extPath('get_menu').'/res/class.tx_getmenu_tcemainprocdm.php');
-$TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['clearCachePostProc'][] = 'tx_getmenu_tcemainprocdm->clearCachePostProc';
+$TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['clearCachePostProc'][] = 'tx_getmenu_tcemainprocdm->clearCachePostProc';*/
 
 
 //************************************************PROCESSCMDMAP******************************************************************************
