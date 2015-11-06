@@ -21,7 +21,7 @@ $TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['clearCachePostP
 
 //************************************************PROCESSCMDMAP******************************************************************************
 //$TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][] = 'EXT:get_menu/hooks/class.processcmdmap_postprocess.php:user_processCmdmap_postProcess';
-$TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][] = 'EXT:get_menu/hooks/class.processcmdmap_postprocess.php:user_processCmdmap_postProcess';
+//$TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][] = 'EXT:get_menu/hooks/class.processcmdmap_postprocess.php:user_processCmdmap_postProcess';
 
 
 //hook in fe_login to fix redirect issue with cookies and varnish
