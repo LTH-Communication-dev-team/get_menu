@@ -2,14 +2,14 @@
 class user_processCmdmap_postProcess {
     public function processCmdmap_afterFinish($pObj)
     {
-        $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('uid, queue, command', 'pages', 'queue IS NOT NULL');
+        /*$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('uid, queue, command', 'pages', 'queue IS NOT NULL');
         while ($row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res)) {
             $node_uid = $row['uid'];
             $parent_uid = $row['queue'];
             $command = $row['command'];
             $this->moveNode($node_uid, $parent_uid, $command);
         }
-        $GLOBALS['TYPO3_DB']->exec_UPDATEquery('pages', '', array('queue' => NULL));
+        $GLOBALS['TYPO3_DB']->exec_UPDATEquery('pages', '', array('queue' => NULL));*/
         //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => "$node_uid, $parent_uid", 'crdate' => time()));
 //move
     }
