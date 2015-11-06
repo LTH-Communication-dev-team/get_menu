@@ -67,7 +67,12 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['scheduler']['tasks']['tx_getmenu_part
 	'description'      => '',
 	'additionalFields' => '',
 );
-
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['scheduler']['tasks']['tx_getmenu_root_transformer'] = array(
+	'extension'        => 'get_menu',
+	'title'            => 'Root transformer',
+	'description'      => '',
+	'additionalFields' => '',
+);
 
 //***********************************************AJAX
 $TYPO3_CONF_VARS['FE']['eID_include']['get_menu'] = 'EXT:get_menu/res/ajax.php'; //New
