@@ -73,6 +73,7 @@ class get_menu_functions {
     
     function clearVarnishCacheForPage($uid_page)
     {
+        echo $uid_page;
         //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $uid_page, 'crdate' => time()));
         $sql = "SELECT DISTINCT UDC.spurl, PC.pagepath, SD.domainName AS domainName
             FROM pages AS node
