@@ -108,9 +108,10 @@ class get_menu_functions {
 	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PURGE");
 	    $res = curl_exec($curl);
+            echo $pageUrl;
 	} catch(Exception $e) {
-            //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $pageUrl, 'crdate' => time()));
-	}
+            echo 'no no';	
+        }
     }
     
     
