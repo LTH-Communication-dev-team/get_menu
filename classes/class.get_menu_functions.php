@@ -37,8 +37,8 @@ class get_menu_functions {
 		if(isset($row['domainName'])) {
                     $domainName = $row['domainName'];
                     $wholePath = str_replace('//','/', trim($domainName));
-                    $this->purge('http://'.$wholePath);
-                    $this->purge('http://'.$wholePath.'/');
+                    $this->ban('http://'.$wholePath);
+                    //$this->purge('http://'.$wholePath.'/');
                 }
 	    }
             $GLOBALS['TYPO3_DB']->sql_free_result($res);
@@ -64,8 +64,8 @@ class get_menu_functions {
         if(isset($row['domainName'])) {
             $domainName = $row['domainName'];
             $wholePath = str_replace('//','/', trim($domainName));
-            $this->purge('http://'.$wholePath);
-            $this->purge('http://'.$wholePath.'/');
+            $this->ban('http://'.$wholePath);
+            //$this->purge('http://'.$wholePath.'/');
         }
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
     }
@@ -93,7 +93,7 @@ class get_menu_functions {
             //Clear varnish cache
             if($domainName) {
                 $wholePath = str_replace('//','/', trim($domainName).'/'.$pagePath.'sucker!');
-                $this->purge($wholePath);
+                $this->ban($wholePath);
             }
         }
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
@@ -124,6 +124,11 @@ class get_menu_functions {
     {
 	try {
 	    $curl = curl_init($pageUrl);
+	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BAN");
+            $res = curl_exec($curl);
+            
+            $curl = curl_init($pageUrl . '/');
 	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BAN");
             $res = curl_exec($curl);
