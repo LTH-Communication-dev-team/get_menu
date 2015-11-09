@@ -381,7 +381,7 @@ class user_processCmdmap_postProcess {
     }*/
     
     
-    private function copyNodeAfter($oldItemId, $newSiblingId)
+   /* private function copyNodeAfter($oldItemId, $newSiblingId)
     {
         //68,77
         $sql = "LOCK TABLE pages WRITE";
@@ -504,8 +504,8 @@ class user_processCmdmap_postProcess {
 		$GLOBALS['TYPO3_DB'] -> sql_query($sql);
 		$sql = "UPDATE pages SET lft = lft - $my_width WHERE lft > $rgt";
 		$GLOBALS['TYPO3_DB'] -> sql_query($sql);
-                /*$sql = "SELECT uid FROM pages WHERE rgt > $rgt OR lft > $rgt";
-                $varnishClean = true;*/
+                //$sql = "SELECT uid FROM pages WHERE rgt > $rgt OR lft > $rgt";
+                //$varnishClean = true;
 	    }
 	}
 	
@@ -520,5 +520,5 @@ class user_processCmdmap_postProcess {
         if($rootId) {
             $get_menuObj->clearMenuCache($rootId);
         }
-    }
+    }*/
 }

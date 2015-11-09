@@ -63,7 +63,7 @@ class get_menu_functions {
         
         if(isset($row['domainName'])) {
             $domainName = $row['domainName'];
-            $wholePath = str_replace('//','/', trim($domainName));
+            $wholePath = str_replace('//','/', trim($domainName) . '/.*');
             $this->ban('http://'.$wholePath);
             //$this->purge('http://'.$wholePath.'/');
         }
