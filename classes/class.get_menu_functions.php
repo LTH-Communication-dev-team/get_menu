@@ -94,7 +94,7 @@ class get_menu_functions {
             if($domainName) {
                 $wholePath = str_replace('//','/', trim($domainName).'/'.$pagePath);
                 $this->purge('http://'.$wholePath);
-                $this->purge('http://'.$wholePath.'/');
+                //$this->purge('http://'.$wholePath.'/');
             }
         }
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
@@ -103,15 +103,50 @@ class get_menu_functions {
     
     function purge($pageUrl)
     {
-	try {
+	/*try {
 	    $curl = curl_init($pageUrl);
 	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PURGE");
 	    $res = curl_exec($curl);
-            echo $pageUrl;
+            //echo $pageUrl;
 	} catch(Exception $e) {
             echo 'no no';	
+        }*/
+        // create both cURL resources
+        $ch1 = curl_init($pageUrl);
+        $ch2 = curl_init($pageUrl . '/');
+
+        // set URL and other appropriate options
+        curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch1, CURLOPT_CUSTOMREQUEST, "PURGE");
+        curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch2, CURLOPT_CUSTOMREQUEST, "PURGE");
+
+        //create the multiple cURL handle
+        $mh = curl_multi_init();
+
+        //add the two handles
+        curl_multi_add_handle($mh,$ch1);
+        curl_multi_add_handle($mh,$ch2);
+
+        $active = null;
+        //execute the handles
+        do {
+            $mrc = curl_multi_exec($mh, $active);
+        } while ($mrc == CURLM_CALL_MULTI_PERFORM);
+
+        while ($active && $mrc == CURLM_OK) {
+            if (curl_multi_select($mh) != -1) {
+                do {
+                    $mrc = curl_multi_exec($mh, $active);
+                } while ($mrc == CURLM_CALL_MULTI_PERFORM);
+            }
         }
+
+        //close the handles
+        curl_multi_remove_handle($mh, $ch1);
+        curl_multi_remove_handle($mh, $ch2);
+        curl_multi_close($mh);
     }
     
     
