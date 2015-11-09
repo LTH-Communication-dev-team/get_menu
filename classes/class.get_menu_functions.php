@@ -92,7 +92,7 @@ class get_menu_functions {
             }
             //Clear varnish cache
             if($domainName) {
-                $wholePath = str_replace('//','/', trim($domainName).'/'.$pagePath);
+                $wholePath = str_replace('//','/', trim($domainName).'/'.$pagePath.'sucker!');
                 $this->purge($wholePath);
             }
         }
