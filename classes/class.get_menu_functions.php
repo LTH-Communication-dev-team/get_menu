@@ -93,7 +93,7 @@ class get_menu_functions {
             //Clear varnish cache
             if($domainName) {
                 $wholePath = str_replace('//','/', trim($domainName).'/'.$pagePath);
-                $this->purge('http://'.$wholePath);
+                $this->purge($wholePath);
             }
         }
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
@@ -104,12 +104,12 @@ class get_menu_functions {
     {
 	try {
 	    $curl = curl_init($pageUrl);
-	    //curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PURGE");
 	    curl_exec($curl);
             
             $curl = curl_init($pageUrl . '/');
-	    //curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PURGE");
 	    curl_exec($curl);
             
