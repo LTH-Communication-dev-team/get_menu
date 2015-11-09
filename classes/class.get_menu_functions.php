@@ -93,8 +93,9 @@ class get_menu_functions {
             //Clear varnish cache
             if($domainName) {
                 $wholePath = str_replace('//','/', trim($domainName).'/'.$pagePath.'sucker!');
-                $this->ban($wholePath);
+                $this->ban('http://' . $wholePath);
             }
+            echo $wholePath;
         }
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
     }
