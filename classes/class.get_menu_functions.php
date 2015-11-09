@@ -104,9 +104,14 @@ class get_menu_functions {
     {
 	try {
 	    $curl = curl_init($pageUrl);
-	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	    //curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PURGE");
-	    $res = curl_exec($curl);
+	    curl_exec($curl);
+            
+            $curl = curl_init($pageUrl . '/');
+	    //curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PURGE");
+	    curl_exec($curl);
             
             curl_close($curl);
 	} catch(Exception $e) {
