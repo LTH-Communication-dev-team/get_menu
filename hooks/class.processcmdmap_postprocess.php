@@ -1,6 +1,6 @@
 <?php
 class user_processCmdmap_postProcess {
-    public function processCmdmap_afterFinish($pObj)
+    /*public function processCmdmap_afterFinish($pObj)
     {
         $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('uid, queue, command', 'pages', 'queue IS NOT NULL AND command != \'\'');
         while ($row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res)) {
@@ -10,9 +10,7 @@ class user_processCmdmap_postProcess {
             $this->moveNode($node_uid, $parent_uid, $command);
         }
         $GLOBALS['TYPO3_DB']->exec_UPDATEquery('pages', '', array('queue' => NULL));
-        //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => "$node_uid, $parent_uid", 'crdate' => time()));
-//move
-    }
+    }*/
     
     public function processCmdmap_postProcess($command, $table, $node_uid, $parent_uid, $pObj)
     {
@@ -28,7 +26,7 @@ class user_processCmdmap_postProcess {
                     } else {
                         $this->storeUpdate($node_uid, $parent_uid);
                     }*/
-                    $this->storeUpdate($node_uid, $parent_uid, $command);
+                    //$this->storeUpdate($node_uid, $parent_uid, $command);
 		    break;
                 /*case 'copy':
                     if(substr($parent_uid, 0,1) === '-') {
