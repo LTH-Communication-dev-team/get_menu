@@ -42,7 +42,9 @@ class tx_getmenu_tcemainprocdm {
     function clearCachePostProc($_params, $pObj)
     {
 	//var_dump($pObj);
-        $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => print_r($_params, true), 'crdate' => time()));
+        $pagepath = tx_pagepath_api::getPagePath($_params['uid_page']);
+        //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => print_r($_params, true), 'crdate' => time()));
+        $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $pagepath, 'crdate' => time()));
         $uid_page = $_params['uid_page'];
         $get_menuObj = new get_menu_functions;
         $pagePath = '';
