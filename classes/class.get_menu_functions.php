@@ -71,28 +71,28 @@ class get_menu_functions {
     }
     
     
-    function clearVarnishCacheForPage($uid_page)
+    function clearVarnishCacheForPage($domain, $uid_page)
     {
-        $sql = "SELECT DISTINCT UDC.spurl, PC.pagepath, SD.domainName AS domainName
+        $sql = "SELECT DISTINCT UDC.spurl, PC.pagepath 
             FROM pages AS node
             LEFT JOIN tx_realurl_pathcache AS PC ON node.uid = PC.page_id
             LEFT JOIN tx_realurl_urldecodecache AS UDC ON node.uid = UDC.page_id
-            LEFT JOIN sys_domain AS SD ON SD.pid = node.root OR SD.pid = (SELECT pid FROM pages WHERE uid = (SELECT root FROM pages WHERE uid = $uid_page))
             WHERE node.uid = $uid_page
         ";
         $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
         while ($row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res)) {
-            if(isset($row['domainName'])) {
+            /*if(isset($row['domainName'])) {
                 $domainName = $row['domainName'];
-            }
+            }*/
             if(isset($row['spurl'])) {
                 $pagePath = $row['spurl'];
             } else if(isset($row['pagepath'])) {
                 $pagePath = $row['pagepath'];
             }
             //Clear varnish cache
-            if($domainName) {
-                $wholePath = str_replace('//','/', trim($domainName).'/'.$pagePath);
+            //if($domainName) {
+            if($domain && $pagePath) {
+                $wholePath = str_replace('//','/', $domainName . '/' . $pagePath);
                 $this->ban('http://' . $wholePath);
             }
             //echo $wholePath;
