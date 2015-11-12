@@ -44,13 +44,19 @@ class tx_getmenu_tcemainprocdm {
 	//var_dump($pObj);
         //$pagepath = tx_pagepath_api::getPagePath($_params['uid_page']);
         //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => print_r($_params, true), 'crdate' => time()));
-        //$domain = t3lib_BEfunc::firstDomainRecord(t3lib_BEfunc::BEgetRootLine($_params['uid_page']));
-        //$pageRecord = t3lib_BEfunc::getRecord('pages', $_params['uid_page']);
-	//$scheme = is_array($pageRecord) && isset($pageRecord['url_scheme']) && $pageRecord['url_scheme'] == t3lib_utility_Http::SCHEME_HTTPS ? 'https' : 'http';
-$api = t3lib_div::makeInstance('tx_pagepath_api');
-$pagepath = $api->getPagePath($_params['uid_page']);
+        $domain = t3lib_BEfunc::firstDomainRecord(t3lib_BEfunc::BEgetRootLine($_params['uid_page']));
+        
+        $this->createTSFE($_params['uid_page']);
 
-$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $pagepath, 'crdate' => time()));
+			$cObj = t3lib_div::makeInstance('tslib_cObj');
+			/* @var $cObj tslib_cObj */
+			$typolinkConf = array(
+				'parameter' => $_params['uid_page']
+			);
+
+			$url = $cObj->typoLink_URL($typolinkConf);
+ 
+        $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $domain . $url, 'crdate' => time()));
         $uid_page = $_params['uid_page'];
         $get_menuObj = new get_menu_functions;
         $pagePath = '';
@@ -99,4 +105,19 @@ $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $pagepath, 'c
             }
 	}
     }
+    
+    protected function createTSFE($pageId) {
+        $GLOBALS['TSFE'] = t3lib_div::makeInstance('tslib_fe', $GLOBALS['TYPO3_CONF_VARS'], $pageId, '');
+
+        $GLOBALS['TSFE']->connectToDB();
+        $GLOBALS['TSFE']->initFEuser();
+        $GLOBALS['TSFE']->determineId();
+        $GLOBALS['TSFE']->getCompressedTCarray();
+        $GLOBALS['TSFE']->initTemplate();
+        $GLOBALS['TSFE']->getConfigArray();
+
+        // Set linkVars, absRefPrefix, etc
+        TSpagegen::pagegenInit();
+    }
+        
 }
