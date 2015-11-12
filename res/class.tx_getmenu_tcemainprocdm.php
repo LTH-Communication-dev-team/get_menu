@@ -87,7 +87,7 @@ class tx_getmenu_tcemainprocdm {
                 $get_menuObj->clearVarnishCacheForPage($domain, $uid_page);
 	    } else if($_params['table']=='tx_dam') {
                 //User is clearing cache for specific page
-                //$get_menuObj->clearVarnishCacheForPage($_params['cacheCmd']);
+                $get_menuObj->clearVarnishCacheForPath($_params['uid']);
             } else if(is_numeric($_params['cacheCmd'])) {
                 //User is clearing cache for specific page
                 $get_menuObj->clearVarnishCacheForPage($domain, $_params['cacheCmd']);

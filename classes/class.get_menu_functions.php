@@ -100,6 +100,19 @@ class get_menu_functions {
     }
     
     
+    function clearVarnishCacheForPath($uid)
+    {
+        $sql = "SELECT CONCAT('http://www.lth.se/', file_path, file_name) AS wholePath FROM tx_dam WHERE uid = " . intval($uid);
+        $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+        $row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res);
+        $wholePath = $row['wholePath'];
+        if($wholePath) {
+            $this->banPath($wholePath);
+        }
+        $GLOBALS['TYPO3_DB']->sql_free_result($res);
+    }
+    
+    
     function purge($pageUrl)
     {
 	try {
@@ -144,6 +157,24 @@ class get_menu_functions {
 	    $curl = curl_init($pageUrl);
 	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BANDOMAIN");
+            $res = curl_exec($curl);
+            
+            /*$curl = curl_init($pageUrl . '/');
+	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BAN");
+            $res = curl_exec($curl);*/
+	} catch(Exception $e) {
+            //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $pageUrl, 'crdate' => time()));
+	}
+    }
+    
+    
+    function banPath($pageUrl)
+    {
+	try {
+	    $curl = curl_init($pageUrl);
+	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BANPATH");
             $res = curl_exec($curl);
             
             /*$curl = curl_init($pageUrl . '/');
