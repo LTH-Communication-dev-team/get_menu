@@ -70,7 +70,7 @@ class user_fileUpload_hooks implements t3lib_extFileFunctions_processDataHook, t
     public function processUpload_postProcessAction(&$filename, t3lib_TCEmain $parentObject)
     {
 	    //$filename = $this->processFile($filename);
-        $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $filename, 'crdate' => time()));
+        
     }
 
     /**
