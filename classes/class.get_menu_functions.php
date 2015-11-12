@@ -102,7 +102,7 @@ class get_menu_functions {
     
     function clearVarnishCacheForPath($uid)
     {
-        $sql = "SELECT CONCAT('http://typotest-2.kansli.lth.se/', file_path, file_name) AS wholePath FROM tx_dam WHERE uid = " . intval($uid);
+        $sql = "SELECT CONCAT('http://www.lth.se/', file_path, file_name) AS wholePath FROM tx_dam WHERE uid = " . intval($uid);
         $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
         $row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res);
         $wholePath = $row['wholePath'];
