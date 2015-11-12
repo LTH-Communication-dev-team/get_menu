@@ -78,24 +78,28 @@ class get_menu_functions {
             WHERE node.uid = $uid_page
         ";
         $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
-        while ($row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res)) {
+        $row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res);
             /*if(isset($row['domainName'])) {
                 $domainName = $row['domainName'];
             }*/
-            if(isset($row['spurl'])) {
-                $pagePath = $row['spurl'];
-            } else if(isset($row['pagepath'])) {
-                $pagePath = $row['pagepath'];
-            }
-            //Clear varnish cache
-            //if($domainName) {
-            if($domain && $pagePath) {
-                $wholePath = str_replace('//','/', $domain . '/' . $pagePath);
-                $this->ban('http://' . $wholePath, $domain, $table);
-                $this->fillCache('http://' . $wholePath);
-            }
-            echo $wholePath;
+        if(isset($row['spurl'])) {
+            $pagePath = $row['spurl'];
+        } else if(isset($row['pagepath'])) {
+            $pagePath = $row['pagepath'];
         }
+        //Clear varnish cache
+        //if($domainName) {
+        if($domain && $pagePath) {
+            $wholePath = str_replace('//','/', $domain . '/' . $pagePath);
+            $this->ban('http://' . $wholePath, $domain, $table);
+            $this->fillCache('http://' . $wholePath);
+        } else if($domain) {
+            $wholePath = str_replace('//','/', $domain);
+            $this->ban('http://' . $wholePath, $domain, $table);
+            $this->fillCache('http://' . $wholePath);
+        }
+        echo $wholePath;
+        
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
     }
     
