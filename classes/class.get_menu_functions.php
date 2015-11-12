@@ -92,7 +92,7 @@ class get_menu_functions {
             //Clear varnish cache
             //if($domainName) {
             if($domain && $pagePath) {
-                $wholePath = str_replace('//','/', $domainName . '/' . $pagePath);
+                $wholePath = str_replace('//','/', $domain . '/' . $pagePath);
                 $this->ban('http://' . $wholePath);
             }
             echo $wholePath;
