@@ -55,6 +55,8 @@ class tx_getmenu_tcemainprocdm {
 			);
 
 			$url = $cObj->typoLink_URL($typolinkConf);
+                        echo '???????????????????';
+                        echo $url;
  
         $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $domain . $url, 'crdate' => time()));
         $uid_page = $_params['uid_page'];
