@@ -93,9 +93,8 @@ class get_menu_functions {
             //if($domainName) {
             if($domain && $pagePath) {
                 $wholePath = str_replace('//','/', $domain . '/' . $pagePath);
-                $this->ban('http://' . $wholePath . '/');
+                $this->ban('http://' . $wholePath);
             }
-            echo 'http://' . $wholePath;
         }
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
     }
@@ -129,10 +128,10 @@ class get_menu_functions {
 	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BAN");
             $res = curl_exec($curl);
             
-            /*$curl = curl_init($pageUrl . '/');
+            $curl = curl_init($pageUrl . '/');
 	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BAN");
-            $res = curl_exec($curl);*/
+            $res = curl_exec($curl);
 	} catch(Exception $e) {
             //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $pageUrl, 'crdate' => time()));
 	}
