@@ -93,7 +93,7 @@ class get_menu_functions {
             //if($domainName) {
             if($domain && $pagePath) {
                 $wholePath = str_replace('//','/', $domain . '/' . $pagePath);
-                $this->ban('http://' . $wholePath);
+                $this->ban('http://' . $wholePath . '/');
             }
             echo 'http://' . $wholePath;
         }
