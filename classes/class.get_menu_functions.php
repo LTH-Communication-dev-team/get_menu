@@ -95,7 +95,7 @@ class get_menu_functions {
                 $wholePath = str_replace('//','/', $domainName . '/' . $pagePath);
                 $this->ban('http://' . $wholePath);
             }
-            //echo $wholePath;
+            echo $wholePath;
         }
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
     }
