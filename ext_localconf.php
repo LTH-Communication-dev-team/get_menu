@@ -7,24 +7,11 @@ $TYPO3_CONF_VARS['FE']['dontSetCookie'] = TRUE;    // we don't wantt set the fe_
 $TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['postUserLookUp'][] = 'user_Tx_Cacheinfo_Hooks_Userauth->writeLoginSessionCookie';
 
 
-//***************************************************HANDLING UPLOAD OF FILES**************************************************************
-// Uploads in fileadmin/
-$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_extfilefunc.php']['processData'][] = 'EXT:get_menu/hooks/class.user_fileupload_hooks.php:user_fileUpload_hooks';
-// Uploads in uploads/
-$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processUpload'][] = 'EXT:get_menu/hooks/class.user_fileupload_hooks.php:user_fileUpload_hooks';
-
 //************************************************CLEARCACHEPOSTPROCESS*********************************************************************
 $GLOBALS ['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] = 'EXT:get_menu/res/class.tx_getmenu_tcemainprocdm.php:tx_getmenu_tcemainprocdm';
 require_once(t3lib_extMgm::extPath('get_menu').'/res/class.tx_getmenu_tcemainprocdm.php');
 $TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['clearCachePostProc'][] = 'tx_getmenu_tcemainprocdm->clearCachePostProc';
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_extfilefunc.php']['processData'][] = 'EXT:get_menu/hooks/class.get_menu_file_handling.php:get_menu_file_handling';
-
-//
-
-
-//************************************************PROCESSCMDMAP******************************************************************************
-//$TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][] = 'EXT:get_menu/hooks/class.processcmdmap_postprocess.php:user_processCmdmap_postProcess';
-$TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][] = 'EXT:get_menu/hooks/class.processcmdmap_postprocess.php:user_processCmdmap_postProcess';
 
 
 //hook in fe_login to fix redirect issue with cookies and varnish

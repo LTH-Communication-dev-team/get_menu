@@ -80,17 +80,17 @@ class tx_getmenu_tcemainprocdm {
                     }
                 } else */
                 if(isset($_params['uid_page'])) {
-                    $get_menuObj->clearVarnishCacheForPage($domain, $uid_page);
+                    $get_menuObj->clearVarnishCacheForPage($domain, $uid_page, 'pages');
                 }
 	    } else if($_params['table']=='tt_content') {
 		//content has been added or updated ...
-                $get_menuObj->clearVarnishCacheForPage($domain, $uid_page);
+                $get_menuObj->clearVarnishCacheForPage($domain, $uid_page, 'tt_content');
 	    } else if($_params['table']=='tx_dam') {
                 //User is clearing cache for specific page
                 $get_menuObj->clearVarnishCacheForPath($_params['uid']);
             } else if(is_numeric($_params['cacheCmd'])) {
                 //User is clearing cache for specific page
-                $get_menuObj->clearVarnishCacheForPage($domain, $_params['cacheCmd']);
+                $get_menuObj->clearVarnishCacheForPage($domain, $_params['cacheCmd'], 'pages');
             }
 	}
     }

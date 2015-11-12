@@ -8,7 +8,7 @@
 
 class get_menu_functions {
     
-    function getRootId($uid_page)
+    /*function getRootId($uid_page)
     {
 	//tslib_eidtools::connectDB();
         $sql = "SELECT SUBSTRING_INDEX(GROUP_CONCAT(template.pid),',',-1) AS rootid
@@ -27,7 +27,7 @@ class get_menu_functions {
             return false;
         }
     }
-    
+    */
     
     function clearAllVarnishCache()
     {
@@ -37,8 +37,7 @@ class get_menu_functions {
 		if(isset($row['domainName'])) {
                     $domainName = $row['domainName'];
                     $wholePath = str_replace('//','/', trim($domainName));
-                    $this->ban('http://'.$wholePath);
-                    //$this->purge('http://'.$wholePath.'/');
+                    $this->ban('http://'.$wholePath, $domain, '');
                 }
 	    }
             $GLOBALS['TYPO3_DB']->sql_free_result($res);
@@ -65,13 +64,12 @@ class get_menu_functions {
             $domainName = $row['domainName'];
             $wholePath = str_replace('//','/', trim($domainName));
             $this->banDomain('http://'.$wholePath);
-            //$this->purge('http://'.$wholePath.'/');
         }
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
     }
     
     
-    function clearVarnishCacheForPage($domain, $uid_page)
+    function clearVarnishCacheForPage($domain, $uid_page, $table)
     {
         $sql = "SELECT DISTINCT UDC.spurl, PC.pagepath 
             FROM pages AS node
@@ -93,8 +91,10 @@ class get_menu_functions {
             //if($domainName) {
             if($domain && $pagePath) {
                 $wholePath = str_replace('//','/', $domain . '/' . $pagePath);
-                $this->ban('http://' . $wholePath);
+                $this->ban('http://' . $wholePath, $domain, $table);
+                $this->fillCache('http://' . $wholePath);
             }
+            echo $wholePath;
         }
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
     }
@@ -102,7 +102,7 @@ class get_menu_functions {
     
     function clearVarnishCacheForPath($uid)
     {
-        $sql = "SELECT CONCAT('http://www.lth.se/', file_path, file_name) AS wholePath FROM tx_dam WHERE uid = " . intval($uid);
+        $sql = "SELECT CONCAT('http://localhost/', file_path, file_name) AS wholePath FROM tx_dam WHERE uid = " . intval($uid);
         $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
         $row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res);
         $wholePath = $row['wholePath'];
@@ -112,7 +112,7 @@ class get_menu_functions {
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
     }
     
-    
+   /* 
     function purge($pageUrl)
     {
 	try {
@@ -121,19 +121,25 @@ class get_menu_functions {
 	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PURGE");
 	    curl_exec($curl);
             
-            /*$curl = curl_init($pageUrl . '/');
-	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PURGE");
-	    curl_exec($curl);*/
-            
             curl_close($curl);
 	} catch(Exception $e) {
             echo 'no no';	
         }
     }
+    */
     
+    private function fillCache($pageUrl)
+    {
+        try {
+            $curl = curl_init($pageUrl);
+	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            $res = curl_exec($curl);
+        } catch(Exception $e) {
+            echo 'Message: ' .$e->getMessage();
+        }
+    }
     
-    function ban($pageUrl)
+    function ban($pageUrl, $domain)
     {
 	try {
 	    $curl = curl_init($pageUrl);
@@ -145,6 +151,13 @@ class get_menu_functions {
 	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BAN");
             $res = curl_exec($curl);
+            
+            if($table === 'pages') {
+                $curl = curl_init(str_replace('//','/', $domain . '/' . 'sitemap'));
+                curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BAN");
+                $res = curl_exec($curl);
+            }
 	} catch(Exception $e) {
             //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $pageUrl, 'crdate' => time()));
 	}
