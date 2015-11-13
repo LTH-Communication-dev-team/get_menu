@@ -8,10 +8,9 @@ $TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['postUserLookUp
 
 
 //************************************************CLEARCACHEPOSTPROCESS*********************************************************************
-$GLOBALS ['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] = 'EXT:get_menu/res/class.tx_getmenu_tcemainprocdm.php:tx_getmenu_tcemainprocdm';
+//$GLOBALS ['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] = 'EXT:get_menu/res/class.tx_getmenu_tcemainprocdm.php:tx_getmenu_tcemainprocdm';
 require_once(t3lib_extMgm::extPath('get_menu').'/res/class.tx_getmenu_tcemainprocdm.php');
 $TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['clearCachePostProc'][] = 'tx_getmenu_tcemainprocdm->clearCachePostProc';
-$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_extfilefunc.php']['processData'][] = 'EXT:get_menu/hooks/class.get_menu_file_handling.php:get_menu_file_handling';
 
 
 //hook in fe_login to fix redirect issue with cookies and varnish
