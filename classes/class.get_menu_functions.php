@@ -98,7 +98,7 @@ class get_menu_functions {
             $this->ban('http://' . $wholePath, $domain, $table);
             $this->fillCache('http://' . $wholePath);
         }
-        echo $wholePath;
+        //echo $wholePath;
         
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
     }
