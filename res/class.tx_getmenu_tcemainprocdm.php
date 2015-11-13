@@ -33,17 +33,31 @@ class tx_getmenu_tcemainprocdm {
 
     
     //Add a fake value to $GLOBALS['TSFE']->fe_user->cookieId. This is needed for fe login redirect to work when fe_typo_user cookie is deleted to enable varnish
-    function initFEuser()
+    /*function initFEuser()
     {
 	$GLOBALS['TSFE']->fe_user->cookieId = 'dummy';
-    }
+    }*/
     
     
     function clearCachePostProc($_params, $pObj)
     {
 	//var_dump($pObj);
         //$pagepath = tx_pagepath_api::getPagePath($_params['uid_page']);
-        $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => print_r($_params, true), 'crdate' => time()));
+        //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => print_r($_params, true), 'crdate' => time()));
+        /*
+         * Array
+(
+    [table] => tt_news
+    [uid] => 12775
+    [uid_page] => 73417
+    [TSConfig] => Array
+        (
+            [clearCacheCmd] => 99495,47661,58763,91959,86369,4,12158,91203,97371,86729,102777,93051,88221,102283,100083,94955,106937,101325,92983,83403,83765,86785,91889,95729,97337,95725,12159,12160,101487,101551,101757,101887,101965
+        )
+
+)
+
+         */
         $uid_page = $_params['uid_page'];
         $domain = t3lib_BEfunc::firstDomainRecord(t3lib_BEfunc::BEgetRootLine($uid_page));
         $get_menuObj = new get_menu_functions;
