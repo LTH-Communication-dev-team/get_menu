@@ -37,7 +37,8 @@ class user_Tx_Cacheinfo_Hooks_Userauth {
      * @param t3lib_userAuth $parent
      * @return void
      */
-    public function writeLoginSessionCookie($content, t3lib_userAuth $parent) {
+    public function writeLoginSessionCookie($content, t3lib_userAuth $parent)
+    {
     //echo '41b'.$parent->loginType.$userIsLoggedIn;
         $userIsLoggedIn = is_array ( $parent->user );
         $validLoginTypes = array ('fe', 'login' );

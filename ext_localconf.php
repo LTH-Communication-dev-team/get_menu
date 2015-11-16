@@ -14,7 +14,7 @@ $TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['clearCachePostP
 
 
 //hook in fe_login to fix redirect issue with cookies and varnish
-//$TYPO3_CONF_VARS['SC_OPTIONS']['tslib/class.tslib_fe.php']['initFEuser'][] = 'tx_getmenu_tcemainprocdm->initFEuser';
+$TYPO3_CONF_VARS['SC_OPTIONS']['tslib/class.tslib_fe.php']['initFEuser'][] = 'tx_getmenu_tcemainprocdm->initFEuser';
 
 
 //************************************************DELETE FE-COOKIE ON LOGOUT

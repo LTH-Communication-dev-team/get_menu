@@ -8,27 +8,6 @@
 
 class get_menu_functions {
     
-    /*function getRootId($uid_page)
-    {
-	//tslib_eidtools::connectDB();
-        $sql = "SELECT SUBSTRING_INDEX(GROUP_CONCAT(template.pid),',',-1) AS rootid
-        FROM pages AS node
-        JOIN pages AS parent
-        LEFT JOIN sys_template AS template ON parent.uid=template.pid
-        WHERE node.lft BETWEEN parent.lft AND parent.rgt
-        AND node.uid = $uid_page
-        ORDER BY node.lft";
-	$res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
-	$row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
-        $GLOBALS['TYPO3_DB']->sql_free_result($res);
-        if(isset($row['rootid'])) {
-            return $row['rootid'];
-        } else {
-            return false;
-        }
-    }
-    */
-    
     function clearAllVarnishCache()
     {
 	try {
@@ -45,7 +24,6 @@ class get_menu_functions {
 	    //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $e, 'crdate' => time()));
 	}
     }
-    
     
     
     function clearVarnishCacheForDomain($uid_page)
@@ -71,7 +49,7 @@ class get_menu_functions {
     
     function clearVarnishCacheForPage($domain, $uid_page, $table)
     {
-        $sql = "SELECT DISTINCT UDC.spurl, PC.pagepath 
+        $sql = "SELECT DISTINCT UDC.spurl, PC.pagepath, node.pid 
             FROM pages AS node
             LEFT JOIN tx_realurl_pathcache AS PC ON node.uid = PC.page_id
             LEFT JOIN tx_realurl_urldecodecache AS UDC ON node.uid = UDC.page_id
@@ -79,16 +57,16 @@ class get_menu_functions {
         ";
         $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
         $row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res);
-            /*if(isset($row['domainName'])) {
-                $domainName = $row['domainName'];
-            }*/
+        if(isset($row['pid'])) {
+            $pid = $row['pid'];
+        }
         if(isset($row['spurl'])) {
             $pagePath = $row['spurl'];
         } else if(isset($row['pagepath'])) {
             $pagePath = $row['pagepath'];
         }
+        
         //Clear varnish cache
-        //if($domainName) {
         if($domain && $pagePath) {
             $wholePath = str_replace('//','/', $domain . '/' . $pagePath);
             $this->ban('http://' . $wholePath, $domain, $table);
@@ -98,7 +76,36 @@ class get_menu_functions {
             $this->ban('http://' . $wholePath, $domain, $table);
             $this->fillCache('http://' . $wholePath);
         }
-        //echo $wholePath;
+        if($pid) {
+            if($pid > 0) {
+                //We have to clear cache of parent page as well
+                $sql = "SELECT DISTINCT UDC.spurl, PC.pagepath
+                    FROM pages AS node
+                    LEFT JOIN tx_realurl_pathcache AS PC ON node.uid = PC.page_id
+                    LEFT JOIN tx_realurl_urldecodecache AS UDC ON node.uid = UDC.page_id
+                    WHERE node.uid = $pid
+                ";
+                $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+                $row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res);
+                
+                if(isset($row['spurl'])) {
+                    $pagePath = $row['spurl'];
+                } else if(isset($row['pagepath'])) {
+                    $pagePath = $row['pagepath'];
+                }
+                
+                //Clear varnish cache
+                if($domain && $pagePath) {
+                    $wholePath = str_replace('//','/', $domain . '/' . $pagePath);
+                    $this->ban('http://' . $wholePath, $domain, $table);
+                    $this->fillCache('http://' . $wholePath);
+                } else if($domain) {
+                    $wholePath = str_replace('//','/', $domain);
+                    $this->ban('http://' . $wholePath, $domain, $table);
+                    $this->fillCache('http://' . $wholePath);
+                }
+            }
+        }
         
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
     }
