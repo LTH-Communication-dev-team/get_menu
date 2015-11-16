@@ -91,8 +91,8 @@ class get_menu_functions {
                     $this->ban('http://' . $wholePath, $domain, $table);
                     $this->fillCache('http://' . $wholePath);
                 } else if($domain) {
-                    $wholePath = str_replace('//','/', $domain);
-                    $this->ban('http://' . $wholePath, $domain, $table . '/.*');
+                    $wholePath = str_replace('//','/', $domain . '/.*');
+                    $this->ban('http://' . $wholePath, $domain, $table);
                     $this->fillCache('http://' . $wholePath);
                 }
             }
@@ -157,10 +157,12 @@ class get_menu_functions {
 	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BAN");
             $res = curl_exec($curl);
             
-            $curl = curl_init($pageUrl . '/');
-	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BAN");
-            $res = curl_exec($curl);
+            if($table !== 'pages') {
+                $curl = curl_init($pageUrl . '/');
+                curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BAN");
+                $res = curl_exec($curl);
+            }
             
             if($table === 'pages') {
                 $curl = curl_init(str_replace('//','/', $domain . '/' . 'sitemap'));
