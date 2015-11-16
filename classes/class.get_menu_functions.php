@@ -40,7 +40,7 @@ class get_menu_functions {
         
         if(isset($row['domainName'])) {
             $domainName = $row['domainName'];
-            $wholePath = str_replace('//','/', trim($domainName));
+            $wholePath = str_replace('//','/', trim($domainName) . '/.*');
             $this->banDomain('http://'.$wholePath);
         }
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
@@ -67,15 +67,6 @@ class get_menu_functions {
         }
         
         //Clear varnish cache
-        if($domain && $pagePath) {
-            $wholePath = str_replace('//','/', $domain . '/' . $pagePath);
-            $this->ban('http://' . $wholePath, $domain, $table);
-            $this->fillCache('http://' . $wholePath);
-        } else if($domain) {
-            $wholePath = str_replace('//','/', $domain);
-            $this->ban('http://' . $wholePath, $domain, $table);
-            $this->fillCache('http://' . $wholePath);
-        }
         if($pid && $table === 'pages') {
             if($pid > 0) {
                 //We have to clear cache of parent page as well
@@ -96,15 +87,23 @@ class get_menu_functions {
                 
                 //Clear varnish cache
                 if($domain && $pagePath) {
-                    $wholePath = str_replace('//','/', $domain . '/' . $pagePath);
+                    $wholePath = str_replace('//','/', $domain . '/' . $pagePath . '/.*');
                     $this->ban('http://' . $wholePath, $domain, $table);
                     $this->fillCache('http://' . $wholePath);
                 } else if($domain) {
                     $wholePath = str_replace('//','/', $domain);
-                    $this->ban('http://' . $wholePath, $domain, $table);
+                    $this->ban('http://' . $wholePath, $domain, $table . '/.*');
                     $this->fillCache('http://' . $wholePath);
                 }
             }
+        } else if($domain && $pagePath) {
+            $wholePath = str_replace('//','/', $domain . '/' . $pagePath);
+            $this->ban('http://' . $wholePath, $domain, $table);
+            $this->fillCache('http://' . $wholePath);
+        } else if($domain) {
+            $wholePath = str_replace('//','/', $domain);
+            $this->ban('http://' . $wholePath, $domain, $table);
+            $this->fillCache('http://' . $wholePath);
         }
         
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
@@ -150,7 +149,7 @@ class get_menu_functions {
         }
     }
     
-    function ban($pageUrl, $domain)
+    function ban($pageUrl, $domain, $table)
     {
 	try {
 	    $curl = curl_init($pageUrl);
