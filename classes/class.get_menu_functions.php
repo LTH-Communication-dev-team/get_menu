@@ -76,7 +76,7 @@ class get_menu_functions {
             $this->ban('http://' . $wholePath, $domain, $table);
             $this->fillCache('http://' . $wholePath);
         }
-        if($pid) {
+        if($pid && $table === 'pages') {
             if($pid > 0) {
                 //We have to clear cache of parent page as well
                 $sql = "SELECT DISTINCT UDC.spurl, PC.pagepath
