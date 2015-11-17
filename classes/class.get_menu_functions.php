@@ -176,11 +176,6 @@ class get_menu_functions {
 	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BANDOWN");
             $res = curl_exec($curl);
-            
-            $curl = curl_init($pageUrl . '/');
-	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BANDOWN");
-            $res = curl_exec($curl);
 	} catch(Exception $e) {
             $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $pageUrl, 'crdate' => time()));
 	}
