@@ -87,22 +87,22 @@ class get_menu_functions {
                 
                 //Clear varnish cache
                 if($domain && $pagePath) {
-                    $wholePath = str_replace('//','/', $domain . '/' . $pagePath . '/.*');
-                    $this->ban('http://' . $wholePath, $domain, $table);
+                    $wholePath = str_replace('//','/', $domain . '/' . $pagePath);
+                    $this->banDown('http://' . $wholePath);
                     $this->fillCache('http://' . $wholePath);
                 } else if($domain) {
-                    $wholePath = str_replace('//','/', $domain . '/.*');
-                    $this->ban('http://' . $wholePath, $domain, $table);
+                    $wholePath = str_replace('//','/', $domain);
+                    $this->banDown('http://' . $wholePath);
                     $this->fillCache('http://' . $wholePath);
                 }
             }
         } else if($domain && $pagePath) {
             $wholePath = str_replace('//','/', $domain . '/' . $pagePath);
-            $this->ban('http://' . $wholePath, $domain, $table);
+            $this->ban('http://' . $wholePath);
             $this->fillCache('http://' . $wholePath);
         } else if($domain) {
             $wholePath = str_replace('//','/', $domain);
-            $this->ban('http://' . $wholePath, $domain, $table);
+            $this->ban('http://' . $wholePath);
             $this->fillCache('http://' . $wholePath);
         }
         
@@ -149,7 +149,7 @@ class get_menu_functions {
         }
     }
     
-    function ban($pageUrl, $domain, $table)
+    function ban($pageUrl)
     {
 	try {
 	    $curl = curl_init($pageUrl);
@@ -157,21 +157,26 @@ class get_menu_functions {
 	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BAN");
             $res = curl_exec($curl);
             
-            if($table !== 'pages') {
-                $curl = curl_init($pageUrl . '/');
-                curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BAN");
-                $res = curl_exec($curl);
-            }
+            $curl = curl_init($pageUrl . '/');
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BAN");
+            $res = curl_exec($curl);
             
-            if($table === 'pages') {
-                $curl = curl_init(str_replace('//','/', $domain . '/' . 'sitemap'));
-                curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BAN");
-                $res = curl_exec($curl);
-            }
 	} catch(Exception $e) {
-            //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $pageUrl, 'crdate' => time()));
+            $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $pageUrl, 'crdate' => time()));
+	}
+    }
+    
+    
+    function banDown($pageUrl)
+    {
+        try {
+	    $curl = curl_init($pageUrl);
+	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BANDOWN");
+            $res = curl_exec($curl);
+	} catch(Exception $e) {
+            $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $pageUrl, 'crdate' => time()));
 	}
     }
     
@@ -183,13 +188,8 @@ class get_menu_functions {
 	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BANDOMAIN");
             $res = curl_exec($curl);
-            
-            /*$curl = curl_init($pageUrl . '/');
-	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BAN");
-            $res = curl_exec($curl);*/
 	} catch(Exception $e) {
-            //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $pageUrl, 'crdate' => time()));
+            $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $pageUrl, 'crdate' => time()));
 	}
     }
     
@@ -201,13 +201,8 @@ class get_menu_functions {
 	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BANPATH");
             $res = curl_exec($curl);
-            
-            /*$curl = curl_init($pageUrl . '/');
-	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BAN");
-            $res = curl_exec($curl);*/
 	} catch(Exception $e) {
-            //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $pageUrl, 'crdate' => time()));
+            $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $pageUrl, 'crdate' => time()));
 	}
     }
     
