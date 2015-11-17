@@ -49,7 +49,7 @@ class get_menu_functions {
     
     function clearVarnishCacheForPage($domain, $uid_page, $table)
     {
-        $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => "$domain, $uid_page, $table", 'crdate' => time()));
+        //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => "$domain, $uid_page, $table", 'crdate' => time()));
         $sql = "SELECT DISTINCT UDC.spurl, PC.pagepath, node.pid 
             FROM pages AS node
             LEFT JOIN tx_realurl_pathcache AS PC ON node.uid = PC.page_id
@@ -66,7 +66,7 @@ class get_menu_functions {
         } else if(isset($row['spurl'])) {
             $pagePath = $row['spurl'];
         }  
-        
+        $tSql = $sql;
         //Clear varnish cache
         if($pid && $table === 'pages') {
             if($pid > 0) {
@@ -77,6 +77,7 @@ class get_menu_functions {
                     LEFT JOIN tx_realurl_urldecodecache AS UDC ON node.uid = UDC.page_id
                     WHERE node.uid = $pid
                 ";
+                $tSql .= $sql;
                 $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
                 $row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res);
                 
@@ -91,11 +92,11 @@ class get_menu_functions {
                     $wholePath = str_replace('//','/', $domain . '/' . $pagePath);
                     $this->banDown('http://' . $wholePath);
                     $this->banDown('http://' . $wholePath);
-                    $this->fillCache('http://' . $wholePath);
+                    //$this->fillCache('http://' . $wholePath);
                 } else if($domain) {
                     $wholePath = str_replace('//','/', $domain);
                     $this->banDown('http://' . $wholePath);
-                    $this->fillCache('http://' . $wholePath);
+                    //$this->fillCache('http://' . $wholePath);
                 }
             }
         } else if($domain && $pagePath) {
@@ -107,7 +108,7 @@ class get_menu_functions {
             $this->ban('http://' . $wholePath);
             $this->fillCache('http://' . $wholePath);
         }
-        
+        $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $wholePath . $tSql, 'crdate' => time()));
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
     }
     
