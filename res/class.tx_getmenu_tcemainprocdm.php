@@ -43,7 +43,7 @@ class tx_getmenu_tcemainprocdm {
     {
 	//var_dump($pObj);
         //$pagepath = tx_pagepath_api::getPagePath($_params['uid_page']);
-        $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => print_r($_params, true), 'crdate' => time()));
+        //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => print_r($_params, true), 'crdate' => time()));
         /*
          * Array
 (
