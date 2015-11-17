@@ -66,7 +66,7 @@ class get_menu_functions {
         } else if(isset($row['spurl'])) {
             $pagePath = $row['spurl'];
         }  
-        $tSql = $sql;
+        //$tSql = $sql;
         //Clear varnish cache
         if($pid && $table === 'pages') {
             if($pid > 0) {
@@ -77,7 +77,7 @@ class get_menu_functions {
                     LEFT JOIN tx_realurl_urldecodecache AS UDC ON node.uid = UDC.page_id
                     WHERE node.uid = $pid
                 ";
-                $tSql .= $sql;
+                //$tSql .= $sql;
                 $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
                 $row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res);
                 
@@ -102,13 +102,13 @@ class get_menu_functions {
         } else if($domain && $pagePath) {
             $wholePath = str_replace('//','/', $domain . '/' . $pagePath);
             $this->ban('http://' . $wholePath);
-            $this->fillCache('http://' . $wholePath);
+            //$this->fillCache('http://' . $wholePath);
         } else if($domain) {
             $wholePath = str_replace('//','/', $domain);
             $this->ban('http://' . $wholePath);
-            $this->fillCache('http://' . $wholePath);
+            //$this->fillCache('http://' . $wholePath);
         }
-        $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $wholePath . $tSql, 'crdate' => time()));
+        //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => $wholePath . $tSql, 'crdate' => time()));
         $GLOBALS['TYPO3_DB']->sql_free_result($res);
     }
     
