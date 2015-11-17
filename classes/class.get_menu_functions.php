@@ -49,6 +49,7 @@ class get_menu_functions {
     
     function clearVarnishCacheForPage($domain, $uid_page, $table)
     {
+        $GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => "$domain, $uid_page, $table", 'crdate' => time()));
         $sql = "SELECT DISTINCT UDC.spurl, PC.pagepath, node.pid 
             FROM pages AS node
             LEFT JOIN tx_realurl_pathcache AS PC ON node.uid = PC.page_id
@@ -60,11 +61,11 @@ class get_menu_functions {
         if(isset($row['pid'])) {
             $pid = $row['pid'];
         }
-        if(isset($row['spurl'])) {
-            $pagePath = $row['spurl'];
-        } else if(isset($row['pagepath'])) {
+        if(isset($row['pagepath'])) {
             $pagePath = $row['pagepath'];
-        }
+        } else if(isset($row['spurl'])) {
+            $pagePath = $row['spurl'];
+        }  
         
         //Clear varnish cache
         if($pid && $table === 'pages') {
@@ -79,11 +80,11 @@ class get_menu_functions {
                 $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
                 $row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res);
                 
-                if(isset($row['spurl'])) {
-                    $pagePath = $row['spurl'];
-                } else if(isset($row['pagepath'])) {
+                if(isset($row['pagepath'])) {
                     $pagePath = $row['pagepath'];
-                }
+                } else if(isset($row['spurl'])) {
+                    $pagePath = $row['spurl'];
+                }  
                 
                 //Clear varnish cache
                 if($domain && $pagePath) {
