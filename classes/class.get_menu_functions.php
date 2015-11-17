@@ -89,6 +89,7 @@ class get_menu_functions {
                 if($domain && $pagePath) {
                     $wholePath = str_replace('//','/', $domain . '/' . $pagePath);
                     $this->banDown('http://' . $wholePath);
+                    $this->banDown('http://' . $wholePath);
                     $this->fillCache('http://' . $wholePath);
                 } else if($domain) {
                     $wholePath = str_replace('//','/', $domain);
@@ -172,6 +173,11 @@ class get_menu_functions {
     {
         try {
 	    $curl = curl_init($pageUrl);
+	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BANDOWN");
+            $res = curl_exec($curl);
+            
+            $curl = curl_init($pageUrl . '/');
 	    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 	    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "BANDOWN");
             $res = curl_exec($curl);
