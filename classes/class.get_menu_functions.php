@@ -49,6 +49,7 @@ class get_menu_functions {
     
     function clearVarnishCacheForPage($domain, $uid_page, $table)
     {
+        //130.235.208.15, 1342, pages
         $sql = "SELECT DISTINCT UDC.spurl, PC.pagepath, node.pid 
             FROM pages AS node
             LEFT JOIN tx_realurl_pathcache AS PC ON node.uid = PC.page_id
@@ -68,7 +69,7 @@ class get_menu_functions {
         //$tSql = $sql;
         //Clear varnish cache
         if($pid && $table === 'pages') {
-            if($pid > 0 || $pid === 1) {
+            if($pid > 0) {
                 //We have to clear cache of parent page as well
                 $sql = "SELECT DISTINCT UDC.spurl, PC.pagepath
                     FROM pages AS node
