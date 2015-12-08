@@ -2,10 +2,10 @@
 if (!defined ('TYPO3_MODE')) die ('Access denied.');
 
 //***************************************************DEAL WITH AUTO FE-COOKIE (from cacheinfo*********************************************
-require_once(t3lib_extMgm::extPath('get_menu').'hooks/userauth.php');
+/*require_once(t3lib_extMgm::extPath('get_menu').'hooks/userauth.php');
 $TYPO3_CONF_VARS['FE']['dontSetCookie'] = TRUE;    // we don't wantt set the fe_user cookie by default
 $TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['postUserLookUp'][] = 'user_Tx_Cacheinfo_Hooks_Userauth->writeLoginSessionCookie';
-
+*/
 
 //************************************************CLEARCACHEPOSTPROCESS*********************************************************************
 //$GLOBALS ['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] = 'EXT:get_menu/res/class.tx_getmenu_tcemainprocdm.php:tx_getmenu_tcemainprocdm';

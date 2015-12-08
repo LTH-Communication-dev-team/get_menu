@@ -35,7 +35,9 @@ class tx_getmenu_tcemainprocdm {
     //Add a fake value to $GLOBALS['TSFE']->fe_user->cookieId. This is needed for fe login redirect to work when fe_typo_user cookie is deleted to enable varnish
     function initFEuser()
     {
-	$GLOBALS['TSFE']->fe_user->cookieId = 'dummy';
+        if (is_object($GLOBALS['TSFE']->fe_user)) {
+            $GLOBALS['TSFE']->fe_user->cookieId = 'dummy';
+        }
     }
     
     
