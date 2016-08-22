@@ -1,4 +1,6 @@
 <?php
+namespace LTH\get_menu\Hooks;
+
 /***************************************************************
 *  Copyright notice
 *
@@ -21,42 +23,32 @@
 *
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
-
+	use TYPO3\CMS\Core\Utility\GeneralUtility;
+	use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
 /**
  * This class contains required hooks which are called by TYPO3
  *
- * @author	Tomas Havner
+ * @author	Andri Steiner  <support@snowflake.ch>
  * @package	TYPO3
- * @subpackage	get_menu
+ * @subpackage	tx_varnish
  */
-
-require_once(dirname(__FILE__).'/../Classes/class.get_menu_functions.php');
-
-class user_get_menu_hooks_ajax
-{
-
+class Frontend {
 
 	/**
-	 * Ban all pages from varnish cache.
+	 * ContentPostProc-output hook to add typo3-pid header
+	 *
+	 * @param array $parameters Parameter
+	 * @param \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController $parent The parent object
+	 *
+	 * @return void
 	 */
-	public function clearCacheForBranch()
-	{
-	    tslib_eidtools::connectDB();
-	    $sql = 'CALL sp_get_menu_get_uids_for_empty_cache('.intval($this->id).')';
-	    //echo $sql;
-	    $res = $GLOBALS['TYPO3_DB']->sql_query($sql);
-	    $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
-	    if(isset($row['uidarray'])) {
-		$uidArray = explode(',',$row['uidarray']);
-		$get_menu_functions = new get_menu_functions();
-		$get_menu_functions->clearTypo3Cache($uidArray);
-	    }
+	public function sendHeader(array $parameters, TypoScriptFrontendController $parent) {
+		// Send Page pid which is used to issue BAN Command against
+		//if (GeneralUtility::getIndpEnv('TYPO3_REV_PROXY') == 1 || \Snowflake\Varnish\Utilities\GeneralUtility::getProperty('alwaysSendTypo3Headers') == 1) {
+			header('TYPO3-Pid: ' . $parent->id);
+			header('TYPO3-Sitename: ' . \TYPO3\CMS\Core\Utility\GeneralUtility::hmac($GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename']));
+		//}
 	}
 
 }
-
-if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/get_menu/hooks/class.tx_varnish_hooks_ajax.php']) {
-	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/get_menu/hooks/class.tx_varnish_hooks_ajax.php']);
-}
-?>

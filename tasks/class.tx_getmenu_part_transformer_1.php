@@ -31,18 +31,95 @@
 	{
             //set_time_limit(0);
 	    $executionSucceeded = FALSE;
+            tslib_eidtools::connectDB();
             
-	    tslib_eidtools::connectDB();
-            
-            $sql = "SELECT DISTINCT root FROM pages WHERE root > 0 AND deleted = 0 LIMIT 0,50";
+            $sql = "SELECT DISTINCT CONCAT(file_path, file_name) as filetocheck FROM tx_dam 
+WHERE uid IN(144767,13905,13905,201075,21979,21987,21977,21945,21935,21961,21963,127515,46511,181603,174487,171253,174613,171253,15537,15531,174917,172775,
+15499,15459,15463,15517,15489,109399,109407,118957,118961,126671,126673,78255,146433,178391,178393,176119,176121,176123,176115,176117,125417,37571,42009,
+187537,187539,78805,78805,76763,76769,76739,76781,76755,76773,76751,76759,112465,76767,76771,76757,102007,126917,126919,76785,76789,112151,181587,184725,
+185405,185407,118279,118267,121385,124029,116601,118291,118289,120609,119581,118267,168941,138585,138595,3747,3751,3757,3771,194289,191973,191861,191701,
+191705,191065,190641,186267,185873,185875,185873,185875,184879,184349,181563,181033,180595,180239,178717,178719,180219,180221,180575,180577,180927,180929,
+180937,180941,181337,182201,182199,181975,149649,182477,182595,183725,183495,184005,184347,184877,184881,186771,186773,187585,187587,188883,188885,187885,
+187887,188887,189669,151877,151891,151879,151881,151887,151893,151885,174027,194609,50755,141059,143921,143919,121935,50755,141059,148251,190409,227241,
+181513,181591,171125)";
             $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
             while ($row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res)) {
-                $this->getPages($row['root']);
+                $filetocheck = $row['filetocheck'];
+                if(is_file('/var/www/html/typo3/'.$filetocheck)) {
+                    echo "<p>$filetocheck ok</p>";
+                } else {
+                    echo "<p>$filetocheck NOT ok</p>";
+                }
+            }
+	    $GLOBALS['TYPO3_DB']->sql_free_result($res);
+            /*$sql = "SELECT uid, name FROM sys_file WHERE identifier LIKE '/_temp_/%'";
+            $nameArray = array();
+            $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+            while ($row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res)) {
+                $nameArray[$row['uid']] = $row['name'];
+            }
+            foreach($nameArray as $key => $value) {
+                $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('uid','tx_dam',"file_name='".$value."'");
+                $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
+                $damuid = $row['uid'];
+                $GLOBALS['TYPO3_DB']->exec_UPDATEquery('sys_file', 'uid='.intval($key), array('_migrateddamuid' => $damuid, 'damUid' => $damuid));
+            }
+
+            $GLOBALS['TYPO3_DB']->sql_free_result($res);
+
+*/
+
+/* $sql = "SELECT
+  tt_news.uid,
+  CONCAT('/_migrated/pics/',SUBSTRING_INDEX(SUBSTRING_INDEX(tt_news.image, ',', numbers.n), ',', -1)) fullname, SUBSTRING_INDEX(SUBSTRING_INDEX(tt_news.image, ',', numbers.n), ',', -1) filename
+FROM
+  (SELECT 1 n UNION ALL SELECT 2
+   UNION ALL SELECT 3 UNION ALL SELECT 4) numbers INNER JOIN tt_news
+  ON CHAR_LENGTH(tt_news.image)
+     -CHAR_LENGTH(REPLACE(tt_news.image, ',', ''))>=numbers.n-1
+     HAVING filename != ''";
+
+            $ttnewsArray = array();
+            $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+            while ($row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res)) {
+                $ttnewsArray[$row['filename']] = array($row['fullname'], $row['uid']);
+            }
+
+            $sql = "SELECT uid, name as filename FROM sys_file";
+            $sysfileArray = array();
+            $res = $GLOBALS['TYPO3_DB'] -> sql_query($sql);
+            while ($row = $GLOBALS["TYPO3_DB"]->sql_fetch_assoc($res)) {
+                $sysfileArray[$row['filename']] = $row['uid'];
             }
             $GLOBALS['TYPO3_DB']->sql_free_result($res);
+            $insertArray = array();
+            foreach($ttnewsArray as $key => $value) {
+                $suid = $sysfileArray[$key];
+                $name = $key;
+                $tuid = $value[1];
+                $insertArray = array('pid' => 73417, 'l10n_diffsource' => '', 
+                    'uid_local' => $tuid, 
+                    'uid_foreign' => $suid, 'tablenames' => 'tt_news',
+                    'field_name' => 'tx_falttnews_fal_images',
+                    'sorting_foreign' => 1, 
+                    'table_local' => 'sys_file',
+                    'tstamp' => time());
+
+                $GLOBALS['TYPO3_DB']->exec_INSERTquery(
+				'sys_file_reference',
+				array(
+					'uid_local'   => $suid,
+					'uid_foreign' => $tuid,
+					'tablenames'  => 'tt_news',
+					'fieldname'   => 'tx_falttnews_fal_images',
+					'table_local' => 'sys_file',
+				)
+			);
+                
+            }
             
             //$this->addRootId();
-	    
+	    */
 	    $executionSucceeded = TRUE;
 	    
 	    return $executionSucceeded;

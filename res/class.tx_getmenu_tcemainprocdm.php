@@ -49,6 +49,7 @@ class tx_getmenu_tcemainprocdm {
     [cacheCmd] => 1342
 )
  */        
+        //$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_devlog', array('msg' => print_r($_params,true), 'crdate' => time()));
         $get_menuObj = new get_menu_functions;
         $pagePath = '';
 	if(isset($_params['cacheCmd']) && $_params['cacheCmd'] == 'all') {
@@ -65,12 +66,7 @@ class tx_getmenu_tcemainprocdm {
                 $uid_page = $_params['uid_page'];
                 $domain = t3lib_BEfunc::firstDomainRecord(t3lib_BEfunc::BEgetRootLine($uid_page));
                 $get_menuObj->clearVarnishCacheForPage($domain, $uid_page, 'tt_content');
-	    } else if($_params['table']=='tx_dam') {
-                //User is clearing cache for specific page
-                $uid_page = $_params['uid_page'];
-                $domain = t3lib_BEfunc::firstDomainRecord(t3lib_BEfunc::BEgetRootLine($uid_page));
-                $get_menuObj->clearVarnishCacheForPath($_params['uid']);
-            } else if(is_numeric($_params['cacheCmd'])) {
+	    } else if(is_numeric($_params['cacheCmd'])) {
                 //User is clearing cache for specific page
                 $uid_page = $_params['cacheCmd'];
                 $domain = t3lib_BEfunc::firstDomainRecord(t3lib_BEfunc::BEgetRootLine($uid_page));
